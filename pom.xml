@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <artifactId>zomboid</artifactId>
+    <groupId>at.mlem.twitch.talkingenemies.zomboid</groupId>
+    <version>0.0.1</version>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.pzstorm</groupId>
+            <artifactId>storm-api</artifactId>
+            <version>0.2.2-mlem</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.pzstorm</groupId>
+            <artifactId>storm-core</artifactId>
+            <version>0.2.2-mlem</version>
+        </dependency>
+        <dependency>
+            <groupId>zomboid</groupId>
+            <artifactId>zomboid</artifactId>
+            <version>41.71</version>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <finalName>twitch-talking-enemies-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assembly/distribution.xml</descriptor>
+                    </descriptors>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
