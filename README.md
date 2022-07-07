@@ -1,9 +1,12 @@
 # Twitch Talking Enemies Zomboid
 
-This is a mod for Project Zomboid. It works only with storm v0.2.2-mlem or above.
-To install storm, go to https://github.com/mlem/storm and download the latest release.
+![](http://mlem.at/twitch-talking-enemies-zomboid.gif)
 
-To install this mod, download the latest release and extract it into your `%USER_HOME%\Zomboid\mods` folder.
+This is a mod for Project Zomboid. It works only with storm v0.2.2-mlem or above.
+To install storm, go to https://github.com/mlem/storm and download the latest [release](https://github.com/mlem/storm/releases).
+
+To install this mod, download the latest [release](https://github.com/mlem/twitch-talking-enemies-zomboid/releases) and extract it into your `%USER_HOME%\Zomboid\mods` folder.
+
 
 e.g. 
 ```
@@ -24,4 +27,12 @@ e.g.
 http://localhost/#access_token=<someRandomCharacters>&scope=chat%3Aread+chat%3Aedit&token_type=bearer
 ```
 
-The oauthToken is needed for a chatbot to join your channel on your behalf.
+The `oauthToken` is needed for the chatbot to read your chat on your behalf.
+
+The `app.properties` will look like this then.
+```
+debug=false
+botName=hello
+channelName=https://twitch.tv/mlem86
+oauthToken=<someRandomCharacters>
+```
