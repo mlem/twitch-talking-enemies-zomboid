@@ -13,7 +13,8 @@ name: build
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      PZ_VERSION: "41.71"
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -22,14 +23,44 @@ jobs:
           distribution: 'zulu' # See 'Supported distributions' for available options
           java-version: '17'
 
+      # Cache Project Zomboid classes
+      - name: Read Zomboid classes cache
+        id: pz-cache
+        uses: actions/cache@v2
+        with:
+          path: ./lib/
+          key: PZ-${{ env.PZ_VERSION }}-${{ secrets.CACHE_VERSION }}
+      # Install Project Zomboid classes
+      - name: Install Zomboid classes
+        if: steps.pz-cache.outputs.cache-hit != 'true'
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: "mlem/zomboid"
+          version: "tags/v${{ env.PZ_VERSION }}"
+          file: "zomboid-${{ env.PZ_VERSION }}.jar"
+          target: "lib/zomboid.jar"
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      # Cache Project Zomboid classes
+      - name: Cache Zomboid classes
+        if: steps.pz-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v2
+        with:
+          path: ./lib/
+          key: PZ-${{ env.PZ_VERSION }}-${{ secrets.CACHE_VERSION }}
+      # Apply correct permissions for lib directory
+      - name: Apply directory permissions
+        run: sudo chmod a+rwx ./lib
+      # Build jar file
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
+      # build zip/tar file and deploy it
       - name: Publish to GitHub Packages Apache Maven
         run: mvn assembly:single deploy
         env:
           GITHUB_TOKEN: ${{ github.token }} # GITHUB_TOKEN is the default env for the password
 
+      # setup maven central publishing
       - name: Set up Apache Maven Central
         uses: actions/setup-java@v3
         with: # running setup-java again overwrites the settings.xml
@@ -41,6 +72,7 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
           gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}  # env variable for GPG private key passphrase
 
+      # Publish artifact to maven central
       - name: Publish to Apache Maven Central
         run: mvn deploy
         env:
