@@ -1,4 +1,4 @@
-# twitch talking enemies zomboid
+# Twitch Talking Enemies Zomboid
 
 This is a mod for Project Zomboid. It works only with storm v0.2.2-mlem or above.
 To install storm, go to https://github.com/mlem/storm and download the latest release.
@@ -10,7 +10,7 @@ e.g.
 unzip twitch-talking-enemies-0.0.1.zip -d ~/Zomboid/mods
 ```
 
-## Configure mod
+## Configuration
 
 In the extracted mod folder you have a `app.properties` file.
 Enter your `channelName` and `oauthToken`.
