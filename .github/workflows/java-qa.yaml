@@ -1,0 +1,25 @@
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'release/**'        # Release branches
+      - 'hotfix/**'         # Hotfix branches
+      - master              # Main project branch
+  pull_request:
+
+# Quality Assurance
+name: code
+
+jobs:
+  check:
+    name: Check compliance
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repository
+      - uses: actions/checkout@v2
+      # Setup Java environment
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu' # See 'Supported distributions' for available options
+          java-version: '17'
+
