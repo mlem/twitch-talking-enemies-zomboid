@@ -42,14 +42,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.pzstorm</groupId>
+            <groupId>at.mlem</groupId>
             <artifactId>storm-api</artifactId>
-            <version>0.2.2-mlem</version>
+            <version>0.2.3</version>
         </dependency>
         <dependency>
-            <groupId>io.github.pzstorm</groupId>
+            <groupId>at.mlem</groupId>
             <artifactId>storm-core</artifactId>
-            <version>0.2.2-mlem</version>
+            <version>0.2.3</version>
         </dependency>
         <dependency>
             <groupId>zomboid</groupId>
