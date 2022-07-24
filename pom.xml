@@ -56,7 +56,7 @@
             <artifactId>zomboid</artifactId>
             <version>41.71</version>
             <scope>system</scope>
-            <systemPath>${basedir}\lib\zomboid.jar</systemPath>
+            <systemPath>${basedir}/lib/zomboid.jar</systemPath>
         </dependency>
     </dependencies>
 
