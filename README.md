@@ -1,6 +1,6 @@
 # Twitch Talking Enemies Zomboid
 
-![](https://github.com/mlem/twitch-talking-enemies-zomboid/raw/0d1b8698c5927dcccad8153c666fb1e109692014/twitch-talking-enemies-zomboid.gif)
+[![showcase](https://github.com/mlem/twitch-talking-enemies-zomboid/raw/0d1b8698c5927dcccad8153c666fb1e109692014/twitch-talking-enemies-zomboid.gif)](https://www.twitch.tv/mlem86)
 
 This is a mod for Project Zomboid. It works only with storm v0.2.5 or above.
 To install storm, go to https://github.com/mlem/storm and download the latest [release](https://github.com/mlem/storm/releases).
@@ -12,6 +12,8 @@ e.g.
 ```
 unzip twitch-talking-enemies-0.0.1.zip -d ~/Zomboid/mods
 ```
+
+You can see me playing with this mod sometimes at [my twitch channel](https://www.twitch.tv/mlem86)
 
 ## Configuration
 
