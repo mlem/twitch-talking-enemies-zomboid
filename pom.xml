@@ -41,21 +41,18 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/at.mlem/storm-api -->
         <dependency>
-            <groupId>io.github.pzstorm</groupId>
+            <groupId>at.mlem</groupId>
             <artifactId>storm-api</artifactId>
-            <version>0.2.2-mlem</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.pzstorm</groupId>
-            <artifactId>storm-core</artifactId>
-            <version>0.2.2-mlem</version>
+            <version>0.2.5</version>
         </dependency>
         <dependency>
             <groupId>zomboid</groupId>
             <artifactId>zomboid</artifactId>
             <version>41.71</version>
-            <scope>provided</scope>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/zomboid.jar</systemPath>
         </dependency>
     </dependencies>
 
