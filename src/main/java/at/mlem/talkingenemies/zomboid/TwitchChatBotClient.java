@@ -332,5 +332,9 @@ public class TwitchChatBotClient {
                     channelName(properties.getProperty("channelName")),
                     properties.getProperty("oauthToken"));
         }
+
+        public Boolean getDebug() {
+            return debug;
+        }
     }
 }

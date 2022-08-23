@@ -20,15 +20,19 @@ public class ModChatBotIntegration {
     private List<TalkingZombie> assignableZombies = new ArrayList<>();
 
     private List<Integer> takenZombies = new ArrayList<>();
+    private boolean debug;
 
-    public void startTwitchChat() {
+    public void startTwitchChat(boolean debug) {
+        this.debug = debug;
 
         Properties properties = loadProperties();
         twitchChatters = new HashMap<>();
         assignableZombies = new ArrayList<>();
         chatListener = new ModChatListener(twitchChatters);
+        TwitchChatBotClient.Args arguments = new TwitchChatBotClient.Args(properties);
+        Mod.debug = arguments.getDebug();
         TwitchChatBotClient.listenToTwitchChat(
-                new TwitchChatBotClient.Args(properties),
+                arguments,
                 chatListener);
         chatListener.start();
     }
@@ -61,13 +65,15 @@ public class ModChatBotIntegration {
 
     public void addToAssignableZombies(TalkingZombie talkingZombie) {
         if (!assignableZombies.contains(talkingZombie) && !takenZombies.contains(talkingZombie.getZombieID())) {
+            StormLogger.info(String.format("Adding Zombie %s to assignable Zombies",
+                    talkingZombie.getZombieID()));
             assignableZombies.add(talkingZombie);
             takenZombies.add(talkingZombie.getZombieID());
 
         }
     }
 
-    public void unassign(TalkingZombie talkingZombie) {
+    public void removeFromAssignableZombies(TalkingZombie talkingZombie) {
         if(talkingZombie.unassign()) {
             assignableZombies.remove(talkingZombie);
             takenZombies.remove(talkingZombie.getZombieID());
@@ -87,7 +93,7 @@ public class ModChatBotIntegration {
 
         @Override
         public void onText(String user, String message) {
-            TwitchChatter twitchChatter = twitchChatters.computeIfAbsent(user, u -> new TwitchChatter(user));
+            TwitchChatter twitchChatter = twitchChatters.computeIfAbsent(user, u -> new TwitchChatter(user, debug));
 
             if (listenToMessages) {
                 if (!twitchChatter.hasZombie()) {

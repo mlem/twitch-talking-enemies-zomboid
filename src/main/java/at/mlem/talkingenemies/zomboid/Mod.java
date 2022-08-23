@@ -24,6 +24,8 @@ public class Mod implements ZomboidMod {
     private Map<String, TalkingZombie> zombies;
     private ModChatBotIntegration modChatBotIntegration;
 
+    public static boolean debug;
+
 
     @Override
     public void registerEventHandlers() {
@@ -35,7 +37,7 @@ public class Mod implements ZomboidMod {
     public void handleGameStart(OnGameStartEvent gameStartEvent) {
         zombies = new HashMap<>();
         modChatBotIntegration = new ModChatBotIntegration();
-        modChatBotIntegration.startTwitchChat();
+        modChatBotIntegration.startTwitchChat(debug);
     }
 
 
@@ -50,12 +52,12 @@ public class Mod implements ZomboidMod {
     @SubscribeEvent
     public void handleZombieUpdate(OnZombieUpdateEvent zombieUpdateEvent) {
         IsoZombie zombie = zombieUpdateEvent.zombie;
-        if (zombies != null
-                && modChatBotIntegration != null) {
-        if (zombies.containsKey(zombie.getUID())) {
-            TalkingZombie talkingZombie = zombies.get(zombie.getUID());
-            talkingZombie.sayTwitchChat();
-        }}
+        if (zombies != null && modChatBotIntegration != null) {
+            if (zombies.containsKey(zombie.getUID())) {
+                TalkingZombie talkingZombie = zombies.get(zombie.getUID());
+                talkingZombie.sayTwitchChat();
+            }
+        }
     }
 
     @SubscribeEvent
@@ -72,13 +74,17 @@ public class Mod implements ZomboidMod {
             TalkingZombie talkingZombie = zombies.computeIfAbsent(zombie.getUID(), s -> createNewTalkingZombie(zombie));
 
             if (!IDLE_STATE_NAMES.contains(aiStateChange.newState.getName())) {
-                if (!talkingZombie.isAssigned()  && talkingZombie.isInRangeOfPlayer()) {
-                    StormLogger.info(String.format("Adding Zombie %s to assignable Zombies",
-                            zombie.ZombieID));
+                boolean inRangeOfPlayer = talkingZombie.isInRangeOfPlayer();
+                if (!talkingZombie.isAssigned() && inRangeOfPlayer) {
                     modChatBotIntegration.addToAssignableZombies(talkingZombie);
+                    if (debug) {
+                        talkingZombie.say(String.format("%s\n assignable", talkingZombie.getZombieID()));
+                    }
+                } else if (!inRangeOfPlayer) {
+                    modChatBotIntegration.removeFromAssignableZombies(talkingZombie);
                 }
             } else if (IDLE_STATE_NAMES.contains(aiStateChange.newState.getName())) {
-                modChatBotIntegration.unassign(talkingZombie);
+                modChatBotIntegration.removeFromAssignableZombies(talkingZombie);
             }
 
 
@@ -96,8 +102,9 @@ public class Mod implements ZomboidMod {
     public void handleZombieDeath(OnZombieDeadEvent zombieDeadEvent) {
         if (zombieDeadEvent.zombie != null) {
             TalkingZombie removedZombie = zombies.remove(zombieDeadEvent.zombie.getUID());
-
-            removedZombie.forceUnassign();
+            if (removedZombie != null) {
+                removedZombie.forceUnassign();
+            }
 
         }
 
