@@ -46,9 +46,6 @@ public class TwitchChatter {
 
     public void assign(TalkingZombie zombie) {
         assignedZombie = zombie;
-        if (debug) {
-            assignedZombie.say("Assigning " + name);
-        }
         while(!messageBacklog.isEmpty()) {
             assignedZombie.addMessage(messageBacklog.poll());
         }
@@ -66,5 +63,9 @@ public class TwitchChatter {
 
     public ColorInfo getColorInfo() {
         return colorInfo;
+    }
+
+    public TalkingZombie getZombie() {
+        return assignedZombie;
     }
 }

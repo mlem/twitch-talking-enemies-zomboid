@@ -1,5 +1,7 @@
 package at.mlem.talkingenemies.zomboid;
 
+import io.pzstorm.storm.logging.StormLogger;
+
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URI;
@@ -57,14 +59,14 @@ public class TwitchChatBotClient {
     }
 
     private static HttpClient createClient() {
-            //SSLContext instance = getSslContext();
+        //SSLContext instance = getSslContext();
 
-            return HttpClient.newBuilder()
-                   // .sslContext(instance)
-                    .version(HttpClient.Version.HTTP_1_1)
-                    .connectTimeout(Duration.ofSeconds(20))
-                    .followRedirects(HttpClient.Redirect.ALWAYS)
-                    .build();
+        return HttpClient.newBuilder()
+                // .sslContext(instance)
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(Duration.ofSeconds(20))
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .build();
     }
 
     private static class WebSocketListener implements WebSocket.Listener {
@@ -104,7 +106,7 @@ public class TwitchChatBotClient {
                 return null;
             }
             CompletableFuture<WebSocket> webSocketCompletableFuture = webSocket.sendText(s, true);
-            System.out.println("Sending " + s);
+            StormLogger.info("Sending " + s);
             return webSocketCompletableFuture;
         }
 
@@ -116,7 +118,7 @@ public class TwitchChatBotClient {
                 return null;
             }
             if (debug) {
-                System.out.println(String.format("Received Binary over WebSocket: %s", data));
+                StormLogger.info(String.format("Received Binary over WebSocket: %s", data));
             }
             return WebSocket.Listener.super.onBinary(webSocket, data, last);
         }
@@ -131,7 +133,7 @@ public class TwitchChatBotClient {
             String receivedMessage = data.toString();
             if (receivedMessage.contains("PRIVMSG")) {
                 PrivMsg privMsg = new PrivMsg(receivedMessage);
-                if(privMsg.message != null) {
+                if (privMsg.message != null) {
                     chatListener.onText(privMsg.displayName, privMsg.message.messageString);
                 }
             } else if (receivedMessage.contains("PING")) {
@@ -139,7 +141,7 @@ public class TwitchChatBotClient {
                 String responsePong = "PONG " + receivedMessage.substring(indexOfLastDoppelpunkt, receivedMessage.length() - 1);
                 webSocket.sendText(responsePong, true);
                 if (debug)
-                    System.out.println("answering ping with: " + responsePong);
+                    StormLogger.info("answering ping with: " + responsePong);
             }
             return completionStage;
         }
@@ -151,7 +153,7 @@ public class TwitchChatBotClient {
                 return null;
             }
             CompletionStage<?> completionStage = WebSocket.Listener.super.onClose(webSocket, statusCode, reason);
-            System.out.println(String.format("Closing WebSocket: %s ; StatusCode: %s", reason, statusCode));
+            StormLogger.info(String.format("Closing WebSocket: %s ; StatusCode: %s", reason, statusCode));
             return completionStage;
         }
 
@@ -161,7 +163,7 @@ public class TwitchChatBotClient {
                 webSocket.abort();
                 return;
             }
-            error.printStackTrace();
+            StormLogger.error("error in chat", error);
             WebSocket.Listener.super.onError(webSocket, error);
         }
 
@@ -171,7 +173,7 @@ public class TwitchChatBotClient {
                 webSocket.abort();
                 return null;
             }
-            System.out.println(String.format("Received Ping over WebSocket: %s", message));
+            StormLogger.info(String.format("Received Ping over WebSocket: %s", message));
             return WebSocket.Listener.super.onPing(webSocket, message);
         }
 
@@ -181,7 +183,7 @@ public class TwitchChatBotClient {
                 webSocket.abort();
                 return null;
             }
-            System.out.println(String.format("Received Pong over WebSocket: %s", message));
+            StormLogger.info(String.format("Received Pong over WebSocket: %s", message));
             return WebSocket.Listener.super.onPong(webSocket, message);
         }
 
@@ -298,7 +300,7 @@ public class TwitchChatBotClient {
         }
 
         public Args(String[] args) {
-            System.out.println(
+            StormLogger.info(
                     String.format(
                             "Command line args passed: %s",
                             Arrays.stream(args).collect(joining(" ; "))

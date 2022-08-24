@@ -31,6 +31,7 @@ public class Mod implements ZomboidMod {
     public void registerEventHandlers() {
         StormLogger.info(String.format("Registering %s as event handler", getClass().getName()));
         StormEventDispatcher.registerEventHandler(this);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> TwitchChatBotClient.shutdownClient()));
     }
 
     @SubscribeEvent

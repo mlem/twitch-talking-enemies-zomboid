@@ -98,18 +98,30 @@ public class ModChatBotIntegration {
             if (listenToMessages) {
                 if (!twitchChatter.hasZombie()) {
                     if (!assignableZombies.isEmpty()) {
-                        TalkingZombie zombie = assignableZombies.get(RANDOM.nextInt(assignableZombies.size()));
-                        takenZombies.add(zombie.getZombieID());
-                        assignableZombies.remove(zombie);
-                        twitchChatter.assign(zombie);
-                        StormLogger.info("assigned user " + twitchChatter.getName() + " to zombie " + zombie);
+                        assignZombie(twitchChatter);
                     }
                 }
-                if (twitchChatter.hasZombie()) {
+                if(twitchChatter.hasZombie() && !twitchChatter.getZombie().isInRangeOfPlayer()) {
+                    StormLogger.info("Re-assigning Zombie for " + user);
+                    takenZombies.remove(twitchChatter.getZombie().getZombieID());
+                    twitchChatter.unassign();
+                    assignZombie(twitchChatter);
+                }
+                // ifs are sequential on purpose, they should pass one after another
+                // this last if should be done as last
+                if(twitchChatter.hasZombie()) {
                     twitchChatter.addMessage(message);
                     StormLogger.info("Adding message: " + user + ": " + message);
                 }
             }
+        }
+
+        private void assignZombie(TwitchChatter twitchChatter) {
+            TalkingZombie zombie = assignableZombies.get(RANDOM.nextInt(assignableZombies.size()));
+            takenZombies.add(zombie.getZombieID());
+            assignableZombies.remove(zombie);
+            twitchChatter.assign(zombie);
+            StormLogger.info("assigned user " + twitchChatter.getName() + " to zombie " + zombie);
         }
 
         public void start() {

@@ -29,7 +29,9 @@ public class TalkingZombie {
         StormLogger.info("Assigning twitch chatter " + twitchChatter.getName());
         this.twitchChatter = twitchChatter;
         ColorInfo colorInfo = colorInfo();
-        zombie.userName.setDefaultColors(colorInfo.r, colorInfo.g, colorInfo.b, colorInfo.a);
+        if (this.zombie.getName() != null) {
+            zombie.userName.setDefaultColors(colorInfo.r, colorInfo.g, colorInfo.b, colorInfo.a);
+        }
     }
 
 
