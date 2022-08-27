@@ -13,12 +13,13 @@ import java.util.Random;
 
 public class TalkingZombie {
 
-    public static final int MAX_DISTANCE_UNTIL_UNASSIGN = 6;
+    public static final int MAX_DISTANCE_UNTIL_UNASSIGN = 10;
     private IsoZombie zombie;
 
     private Queue<String> messages = new ArrayDeque<>();
 
     private TwitchChatter twitchChatter;
+    private long lastSpoken = 0;
 
     public TalkingZombie(IsoZombie zombie) {
 
@@ -49,9 +50,9 @@ public class TalkingZombie {
 
 
     public void say(String message) {
-        ColorInfo colorInfo = colorInfo();
-        zombie.Say(message, colorInfo.r, colorInfo.g, colorInfo.b, null, 180, "radio");
-        zombie.setLastSpokenLine(message);
+            ColorInfo colorInfo = colorInfo();
+            zombie.Say(message, colorInfo.r, colorInfo.g, colorInfo.b, null, 180f, "radio");
+            zombie.setLastSpokenLine(message);
     }
 
     private ColorInfo colorInfo() {
@@ -66,20 +67,12 @@ public class TalkingZombie {
     }
 
     public void sayTwitchChat() {
-        if (!messages.isEmpty() && twitchChatter != null) {
+        if (!messages.isEmpty() && twitchChatter != null && lastSpoken < Instant.now().getEpochSecond()) {
             say(twitchChatter.getName() + ": " + messages.poll());
+            lastSpoken = Instant.now().getEpochSecond();
         }
     }
 
-
-    public boolean unassign() {
-        if (!isInRangeOfPlayer()) {
-            forceUnassign();
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     public boolean isInRangeOfPlayer() {
         if (zombie != null && IsoPlayer.getInstance() != null) {
@@ -91,7 +84,8 @@ public class TalkingZombie {
     public void forceUnassign() {
         if (twitchChatter != null) {
             StormLogger.info("unassigning user " + twitchChatter.getName());
-            twitchChatter.unassign();
+            // returning messages to backlog
+            twitchChatter.unassign(messages);
             twitchChatter = null;
         }
         if (zombie != null) {
@@ -106,6 +100,7 @@ public class TalkingZombie {
     }
 
     public void addMessage(String message) {
+        StormLogger.info(String.format("Adding message to zombie(%s): %s",getZombieID(), message));
         messages.add(message);
     }
 
@@ -115,6 +110,10 @@ public class TalkingZombie {
         } else {
             return -1;
         }
+    }
+
+    public void clearChatter() {
+        twitchChatter = null;
     }
 }
 

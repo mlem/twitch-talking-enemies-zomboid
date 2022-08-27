@@ -259,7 +259,9 @@ public class TwitchChatBotClient {
 
                     } else if (part.startsWith("user-type")) {
                         userType = extractValue(part);
-                        message = new Message(userType);
+                        if (userType != null) {
+                            message = new Message(userType);
+                        }
 
                     }
                 });
@@ -278,8 +280,15 @@ public class TwitchChatBotClient {
                 private final String messageString;
 
                 public Message(String userType) {
-                    String interestingPart = userType.substring(userType.indexOf("PRIVMSG"), userType.length() - 1);
-                    messageString = interestingPart.substring(interestingPart.indexOf(":") + 1, interestingPart.length() - 1);
+                    String msg;
+                    try {
+                        String interestingPart = userType.substring(userType.indexOf("PRIVMSG"), userType.length() - 1);
+                        msg = interestingPart.substring(interestingPart.indexOf(":") + 1, interestingPart.length() - 1);
+                    } catch (Exception e) {
+                        StormLogger.error("Error while parsing message, using dummy message", e);
+                        msg = "-error in the message-";
+                    }
+                    this.messageString = msg;
                 }
             }
         }

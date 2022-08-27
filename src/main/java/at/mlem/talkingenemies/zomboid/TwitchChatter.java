@@ -1,26 +1,27 @@
 package at.mlem.talkingenemies.zomboid;
 
+import io.pzstorm.storm.logging.StormLogger;
 import zombie.characters.TalkingZombie;
 import zombie.core.textures.ColorInfo;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TwitchChatter {
 
     private final ColorInfo colorInfo;
     private String name;
-    private boolean debug;
 
     private Queue<String> messageBacklog = new ArrayDeque<>();
 
     private TalkingZombie assignedZombie;
     private Random random = new Random();
 
-    public TwitchChatter(String name, boolean debug) {
+    public TwitchChatter(String name) {
         this.name = name;
-        this.debug = debug;
         this.colorInfo = new ColorInfo(
                 random.nextFloat(),
                 random.nextFloat(),
@@ -33,18 +34,24 @@ public class TwitchChatter {
     }
 
     public void addMessage(String message) {
-        if (assignedZombie != null) {
+        if (assignedZombie != null && assignedZombie.isInRangeOfPlayer()) {
             assignedZombie.addMessage(message);
-        } else {
+             } else {
             messageBacklog.add(message);
+            StormLogger.info(String.format("Adding message to backlog: %s: %s", name, message));
+
         }
     }
 
     public boolean hasZombie() {
-        return assignedZombie != null;
+        return assignedZombie != null && assignedZombie.isInRangeOfPlayer();
     }
 
     public void assign(TalkingZombie zombie) {
+        if(assignedZombie != null) {
+            assignedZombie.forceUnassign();
+            StormLogger.info("Re-assigning Zombie for " + name);
+        }
         assignedZombie = zombie;
         while(!messageBacklog.isEmpty()) {
             assignedZombie.addMessage(messageBacklog.poll());
@@ -52,11 +59,10 @@ public class TwitchChatter {
         zombie.assignTwitchUser(this);
     }
 
-    public void unassign() {
+    public void unassign(Queue<String> messages) {
         if (assignedZombie != null) {
-            if (debug) {
-                assignedZombie.say("Unassigning " + name);
-            }
+            messageBacklog = new ArrayDeque<>(Stream.concat(messages.stream(), messageBacklog.stream()).collect(Collectors.toList()));
+            assignedZombie.clearChatter();
             assignedZombie = null;
         }
     }

@@ -1,7 +1,6 @@
 package at.mlem.talkingenemies.zomboid;
 
 import io.pzstorm.storm.logging.StormLogger;
-import zombie.characters.TalkingZombie;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,17 +16,11 @@ public class ModChatBotIntegration {
 
     private Map<String, TwitchChatter> twitchChatters = new HashMap<>();
 
-    private List<TalkingZombie> assignableZombies = new ArrayList<>();
 
-    private List<Integer> takenZombies = new ArrayList<>();
-    private boolean debug;
-
-    public void startTwitchChat(boolean debug) {
-        this.debug = debug;
-
+    public void startTwitchChat() {
         Properties properties = loadProperties();
         twitchChatters = new HashMap<>();
-        assignableZombies = new ArrayList<>();
+        ZombieStore.resetStore();
         chatListener = new ModChatListener(twitchChatters);
         TwitchChatBotClient.Args arguments = new TwitchChatBotClient.Args(properties);
         Mod.debug = arguments.getDebug();
@@ -54,29 +47,12 @@ public class ModChatBotIntegration {
 
     public void stopTwitchChat() {
         twitchChatters = new HashMap<>();
-        assignableZombies = new ArrayList<>();
+        ZombieStore.resetStore();
         TwitchChatBotClient.shutdownClient();
         if (chatListener != null) {
             chatListener.stop();
             chatListener = null;
 
-        }
-    }
-
-    public void addToAssignableZombies(TalkingZombie talkingZombie) {
-        if (!assignableZombies.contains(talkingZombie) && !takenZombies.contains(talkingZombie.getZombieID())) {
-            StormLogger.info(String.format("Adding Zombie %s to assignable Zombies",
-                    talkingZombie.getZombieID()));
-            assignableZombies.add(talkingZombie);
-            takenZombies.add(talkingZombie.getZombieID());
-
-        }
-    }
-
-    public void removeFromAssignableZombies(TalkingZombie talkingZombie) {
-        if(talkingZombie.unassign()) {
-            assignableZombies.remove(talkingZombie);
-            takenZombies.remove(talkingZombie.getZombieID());
         }
     }
 
@@ -93,35 +69,14 @@ public class ModChatBotIntegration {
 
         @Override
         public void onText(String user, String message) {
-            TwitchChatter twitchChatter = twitchChatters.computeIfAbsent(user, u -> new TwitchChatter(user, debug));
+            TwitchChatter twitchChatter = twitchChatters.computeIfAbsent(user, u -> new TwitchChatter(user));
 
             if (listenToMessages) {
                 if (!twitchChatter.hasZombie()) {
-                    if (!assignableZombies.isEmpty()) {
-                        assignZombie(twitchChatter);
-                    }
+                    ZombieStore.getInstance().assignZombie(twitchChatter);
                 }
-                if(twitchChatter.hasZombie() && !twitchChatter.getZombie().isInRangeOfPlayer()) {
-                    StormLogger.info("Re-assigning Zombie for " + user);
-                    takenZombies.remove(twitchChatter.getZombie().getZombieID());
-                    twitchChatter.unassign();
-                    assignZombie(twitchChatter);
-                }
-                // ifs are sequential on purpose, they should pass one after another
-                // this last if should be done as last
-                if(twitchChatter.hasZombie()) {
-                    twitchChatter.addMessage(message);
-                    StormLogger.info("Adding message: " + user + ": " + message);
-                }
+                twitchChatter.addMessage(message);
             }
-        }
-
-        private void assignZombie(TwitchChatter twitchChatter) {
-            TalkingZombie zombie = assignableZombies.get(RANDOM.nextInt(assignableZombies.size()));
-            takenZombies.add(zombie.getZombieID());
-            assignableZombies.remove(zombie);
-            twitchChatter.assign(zombie);
-            StormLogger.info("assigned user " + twitchChatter.getName() + " to zombie " + zombie);
         }
 
         public void start() {
