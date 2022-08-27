@@ -13,7 +13,7 @@ import java.util.Random;
 
 public class TalkingZombie {
 
-    public static final int MAX_DISTANCE_UNTIL_UNASSIGN = 10;
+    public static final int MAX_DISTANCE_UNTIL_UNASSIGN = 15;
     private IsoZombie zombie;
 
     private Queue<String> messages = new ArrayDeque<>();
@@ -76,7 +76,7 @@ public class TalkingZombie {
 
     public boolean isInRangeOfPlayer() {
         if (zombie != null && IsoPlayer.getInstance() != null) {
-            return zombie.DistTo(IsoPlayer.getInstance()) < MAX_DISTANCE_UNTIL_UNASSIGN;
+            return zombie.IsVisibleToPlayer[0] && zombie.DistTo(IsoPlayer.getInstance()) < MAX_DISTANCE_UNTIL_UNASSIGN;
         }
         return false;
     }
