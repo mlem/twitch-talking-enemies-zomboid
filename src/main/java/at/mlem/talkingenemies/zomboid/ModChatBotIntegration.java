@@ -15,6 +15,7 @@ public class ModChatBotIntegration {
     private TwitchChatBotClient.ChatListener chatListener;
 
     private Map<String, TwitchChatter> twitchChatters = new HashMap<>();
+    private List<String> blacklist;
 
 
     public void startTwitchChat() {
@@ -24,6 +25,7 @@ public class ModChatBotIntegration {
         chatListener = new ModChatListener(twitchChatters);
         TwitchChatBotClient.Args arguments = new TwitchChatBotClient.Args(properties);
         Mod.debug = arguments.getDebug();
+        blacklist = arguments.getBlacklist();
         TwitchChatBotClient.listenToTwitchChat(
                 arguments,
                 chatListener);
@@ -69,6 +71,9 @@ public class ModChatBotIntegration {
 
         @Override
         public void onText(String user, String message) {
+            if(blacklist.contains(user)) {
+                return;
+            }
             TwitchChatter twitchChatter = twitchChatters.computeIfAbsent(user, u -> new TwitchChatter(user));
 
             if (listenToMessages) {

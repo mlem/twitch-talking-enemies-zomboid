@@ -2,16 +2,13 @@ package at.mlem.talkingenemies.zomboid;
 
 import io.pzstorm.storm.logging.StormLogger;
 
-import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
-import java.security.*;
-import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -301,11 +298,14 @@ public class TwitchChatBotClient {
         private String channelName;
         private String oauthToken;
 
-        public Args(Boolean debug, String botName, String channelName, String oauthToken) {
+        private List<String> blacklist;
+
+        public Args(Boolean debug, String botName, String channelName, String oauthToken, String blacklist) {
             this.debug = debug;
             this.botName = botName;
             this.channelName = channelName(channelName);
             this.oauthToken = oauthToken;
+            this.blacklist = Arrays.stream(blacklist.split(",")).toList();
         }
 
         public Args(String[] args) {
@@ -341,11 +341,17 @@ public class TwitchChatBotClient {
                     debug(properties.getProperty("debug")),
                     properties.getProperty("botName"),
                     channelName(properties.getProperty("channelName")),
-                    properties.getProperty("oauthToken"));
+                    properties.getProperty("oauthToken"),
+                    properties.getProperty("blacklist"));
         }
 
         public Boolean getDebug() {
             return debug;
+        }
+
+
+        public List<String> getBlacklist() {
+            return blacklist;
         }
     }
 }
