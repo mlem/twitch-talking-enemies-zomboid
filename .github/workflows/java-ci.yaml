@@ -56,26 +56,13 @@ jobs:
 
       # build zip/tar file and deploy it
       - name: Publish to GitHub Packages Apache Maven
-        run: mvn assembly:single deploy
-        env:
-          GITHUB_TOKEN: ${{ github.token }} # GITHUB_TOKEN is the default env for the password
-
-      # setup maven central publishing
-      - name: Set up Apache Maven Central
-        uses: actions/setup-java@v3
-        with: # running setup-java again overwrites the settings.xml
-          distribution: 'zulu'
-          java-version: '17'
-          server-id: maven # Value of the distributionManagement/repository/id field of the pom.xml
-          server-username: MAVEN_USERNAME # env variable for username in deploy
-          server-password: MAVEN_CENTRAL_TOKEN # env variable for token in deploy
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
-          gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}  # env variable for GPG private key passphrase
-
-      # Publish artifact to maven central
-      - name: Publish to Apache Maven Central
-        run: mvn deploy
-        env:
-          MAVEN_USERNAME: mlem
-          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: mvn -B assembly:single
+      # Upload dist artifacts as run artifacts
+      - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Artifacts
+        path: |
+         target/*.jar
+         target/*.tar
+         target/*.zip
