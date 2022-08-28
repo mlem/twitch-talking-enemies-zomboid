@@ -19,7 +19,6 @@ public class Mod implements ZomboidMod {
 
     private static final List<String> IDLE_STATE_NAMES = List.of("ZombieIdleState", "ZombieEatBodyState");
 
-    private Random random = new Random();
 
     private ModChatBotIntegration modChatBotIntegration;
 
@@ -44,6 +43,7 @@ public class Mod implements ZomboidMod {
     public void handleGameStop(OnMainScreenRenderEvent mainScreenRenderEvent) {
         if (modChatBotIntegration != null) {
             modChatBotIntegration.stopTwitchChat();
+            modChatBotIntegration = null;
         }
     }
 
@@ -51,14 +51,11 @@ public class Mod implements ZomboidMod {
     public void handleZombieUpdate(OnZombieUpdateEvent zombieUpdateEvent) {
         IsoZombie zombie = zombieUpdateEvent.zombie;
         if (modChatBotIntegration != null) {
-            if (ZombieStore.getInstance().contains(zombie.getUID())) {
-                TalkingZombie talkingZombie = ZombieStore.getInstance().get(zombie.getUID());
-                assignOrRemoveAssignableZombie(talkingZombie);
-                talkingZombie.sayTwitchChat();
-            }
+            TalkingZombie talkingZombie = ZombieStore.getInstance().getOrCreate(zombie.getUID(), zombie);
+            ZombieStore.getInstance().assignOrRemoveAssignableZombie(talkingZombie);
+            talkingZombie.sayTwitchChat();
         }
     }
-
     @SubscribeEvent
     public void handleZombie(OnAIStateChangeEvent aiStateChange) {
         IsoGameCharacter character = aiStateChange.character;
@@ -73,24 +70,11 @@ public class Mod implements ZomboidMod {
 
             TalkingZombie talkingZombie = ZombieStore.getInstance().getOrCreate(zombie.getUID(), zombie);
 
-            if (!IDLE_STATE_NAMES.contains(aiStateChange.newState.getName())) {
-                assignOrRemoveAssignableZombie(talkingZombie);
-            } else if (IDLE_STATE_NAMES.contains(aiStateChange.newState.getName())) {
-                ZombieStore.getInstance().removeFromAssignableZombies(talkingZombie);
-            }
-
-
+            ZombieStore.getInstance().assignOrRemoveAssignableZombie(talkingZombie);
         }
 
     }
 
-    private void assignOrRemoveAssignableZombie(TalkingZombie talkingZombie) {
-        if (talkingZombie.isInRangeOfPlayer()) {
-            ZombieStore.getInstance().addToAssignableZombies(talkingZombie);
-        } else {
-            ZombieStore.getInstance().removeFromAssignableZombies(talkingZombie);
-        }
-    }
 
     @SubscribeEvent
     public void handleZombieDeath(OnZombieDeadEvent zombieDeadEvent) {

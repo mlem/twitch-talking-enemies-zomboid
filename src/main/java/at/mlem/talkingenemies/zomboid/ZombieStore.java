@@ -4,10 +4,7 @@ import io.pzstorm.storm.logging.StormLogger;
 import zombie.characters.IsoZombie;
 import zombie.characters.TalkingZombie;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static at.mlem.talkingenemies.zomboid.ModChatBotIntegration.RANDOM;
 
@@ -17,9 +14,12 @@ public class ZombieStore {
     private Map<String, TalkingZombie> globalZombies;
     private List<TalkingZombie> assignableZombies;
 
+    private Queue<TwitchChatter> twitchChatterQueue;
+
     private ZombieStore() {
         globalZombies = new HashMap<>();
         assignableZombies = new ArrayList<>();
+        twitchChatterQueue = new ArrayDeque<>();
     }
 
     public static ZombieStore getInstance() {
@@ -57,17 +57,21 @@ public class ZombieStore {
     public void remove(String uid) {
         TalkingZombie removed = globalZombies.remove(uid);
         if (removed != null) {
-            removed.forceUnassign();
+            removed.unassign();
         }
         assignableZombies.remove(removed);
     }
 
     public void addToAssignableZombies(TalkingZombie talkingZombie) {
         if (!assignableZombies.contains(talkingZombie) && !talkingZombie.isAssigned()) {
-            StormLogger.info(String.format("Adding Zombie %s to assignable Zombies (Size: %d)",
-                    talkingZombie.getZombieID(), assignableZombies.size()));
-            assignableZombies.add(talkingZombie);
-
+            if(!twitchChatterQueue.isEmpty()) {
+                TwitchChatter twitchChatter = twitchChatterQueue.poll();
+                twitchChatter.assign(talkingZombie);
+            } else {
+                StormLogger.info(String.format("Adding Zombie %s to assignable Zombies (Size: %d)",
+                        talkingZombie.getZombieID(), assignableZombies.size()));
+                assignableZombies.add(talkingZombie);
+            }
         }
     }
 
@@ -76,7 +80,7 @@ public class ZombieStore {
             StormLogger.info(String.format("Removing Zombie %s from assignable Zombies (Size: %d)",
                     talkingZombie.getZombieID(), assignableZombies.size()));
             assignableZombies.remove(talkingZombie);
-            talkingZombie.forceUnassign();
+            talkingZombie.unassign();
         }
 
     }
@@ -85,8 +89,25 @@ public class ZombieStore {
         if (!assignableZombies.isEmpty()) {
             TalkingZombie zombie = assignableZombies.get(RANDOM.nextInt(assignableZombies.size()));
             assignableZombies.remove(zombie);
-            twitchChatter.assign(zombie);
-            StormLogger.info(String.format("assigned user %s to zombie %s", twitchChatter.getName(), zombie.getZombieID()));
+            if(!zombie.isAssigned()) {
+                twitchChatter.assign(zombie);
+
+            }
+        } else {
+            if(!twitchChatterQueue.contains(twitchChatter)) {
+                twitchChatterQueue.add(twitchChatter);
+                StormLogger.info(String.format("adding user %s to queue", twitchChatter.getName()));
+            }
+
+        }
+    }
+
+    public void assignOrRemoveAssignableZombie(TalkingZombie talkingZombie) {
+        if (talkingZombie.isInRangeOfPlayer()) {
+            addToAssignableZombies(talkingZombie);
+        } else {
+            removeFromAssignableZombies(talkingZombie);
+            talkingZombie.unassign();
         }
     }
 }

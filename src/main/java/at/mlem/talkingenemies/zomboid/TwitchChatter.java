@@ -49,14 +49,19 @@ public class TwitchChatter {
 
     public void assign(TalkingZombie zombie) {
         if(assignedZombie != null) {
-            assignedZombie.forceUnassign();
+            assignedZombie.unassign();
             StormLogger.info("Re-assigning Zombie for " + name);
         }
         assignedZombie = zombie;
-        while(!messageBacklog.isEmpty()) {
+        StormLogger.info(String.format("assigned user %s to zombie %s", getName(), zombie.getZombieID()));
+        addMessagesFromBacklog();
+        zombie.assignTwitchUser(this);
+    }
+
+    public void addMessagesFromBacklog() {
+        while(assignedZombie != null && !messageBacklog.isEmpty()) {
             assignedZombie.addMessage(messageBacklog.poll());
         }
-        zombie.assignTwitchUser(this);
     }
 
     public void unassign(Queue<String> messages) {
