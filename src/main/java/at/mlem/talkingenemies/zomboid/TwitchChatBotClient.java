@@ -99,10 +99,11 @@ public class TwitchChatBotClient {
         }
 
         private void validateAndUpdateToken() {
-            if(!TokenValidator.isTokenValid(oauthToken)) {
+            if (!TokenValidator.isTokenValid(oauthToken)) {
                 oauthToken = TokenFetcher.fetchNewToken();
                 modProperties.setOauthToken(oauthToken);
                 modProperties.saveProperties();
+                System.out.println("saving properties");
             }
         }
 
@@ -136,18 +137,35 @@ public class TwitchChatBotClient {
                 return null;
             }
             CompletionStage<?> completionStage = WebSocket.Listener.super.onText(webSocket, data, last);
-            String receivedMessage = data.toString();
-            if (receivedMessage.contains("PRIVMSG")) {
-                PrivMsg privMsg = new PrivMsg(receivedMessage);
-                if (privMsg.message != null) {
-                    chatListener.onText(privMsg.displayName, privMsg.message.messageString);
+            String[] messages = data.toString().split("\\r\\n");
+            for (String receivedMessage : messages) {
+                System.out.println(receivedMessage);
+                TwitchChatParser.Message message = TwitchChatParser.toMessage(receivedMessage);
+                if (message == null) {
+                    return completionStage;
                 }
-            } else if (receivedMessage.contains("PING")) {
-                int indexOfLastDoppelpunkt = receivedMessage.lastIndexOf(":");
-                String responsePong = "PONG " + receivedMessage.substring(indexOfLastDoppelpunkt, receivedMessage.length() - 1);
-                webSocket.sendText(responsePong, true);
-                if (debug)
-                    StormLogger.info("answering ping with: " + responsePong);
+                String command = message.command.getCommand();
+                if ("PRIVMSG".equals(command)) {
+                    if (message.command.botCommand != null) {
+                        // here comes the botCommand handling
+                    } else {
+                        if (message.parameters != null) {
+                            chatListener.onText(message.source.nick, message.parameters);
+                        }
+                    }
+                } else if ("PING".equals(command)) {
+                    int indexOfLastDoppelpunkt = receivedMessage.lastIndexOf(":");
+                    String responsePong = "PONG " + receivedMessage.substring(indexOfLastDoppelpunkt, receivedMessage.length() - 1);
+                    webSocket.sendText(responsePong, true);
+                    if (debug)
+                        StormLogger.info("answering ping with: " + responsePong);
+                } else if ("NOTICE".equals(command)) {
+                    StormLogger.warn(String.format("Received NOTICE with following text: %s", receivedMessage));
+                } else if ("PART".equals(command)) {
+                    StormLogger.warn(String.format("Received PART (The channel must have banned (/ban) the bot) with following text: %s", receivedMessage));
+                } else if ("001".equals(command)) {
+                    StormLogger.info(String.format("Received 001 which means successfully logged in: %s", receivedMessage));
+                }
             }
             return completionStage;
         }
@@ -197,107 +215,6 @@ public class TwitchChatBotClient {
             shutdown = true;
         }
 
-        private class PrivMsg {
-            private Message message;
-            private String userType;
-            private String userId;
-            private String turbo;
-            private String sentTimestamp;
-            private String subscriber;
-            private String roomId;
-            private String mod;
-            private String id;
-            private String flags;
-            private String firstMsg;
-            private String emotes;
-            private String displayName;
-            private String color;
-            private String clientNonce;
-            private String badges;
-            private String badgeInfo;
-
-            public PrivMsg(String receivedMessage) {
-                String[] split = receivedMessage.split(";");
-                Arrays.stream(split).forEach(part -> {
-                    if (part.startsWith("@badge-info")) {
-                        badgeInfo = extractValue(part);
-                    } else if (part.startsWith("badges")) {
-                        badges = extractValue(part);
-
-                    } else if (part.startsWith("client-nonce")) {
-                        clientNonce = extractValue(part);
-
-                    } else if (part.startsWith("color")) {
-                        color = extractValue(part);
-
-                    } else if (part.startsWith("display-name")) {
-                        displayName = extractValue(part);
-
-                    } else if (part.startsWith("emotes")) {
-                        emotes = extractValue(part);
-
-                    } else if (part.startsWith("first-msg")) {
-                        firstMsg = extractValue(part);
-
-                    } else if (part.startsWith("flags")) {
-                        flags = extractValue(part);
-
-                    } else if (part.startsWith("id")) {
-                        id = extractValue(part);
-
-                    } else if (part.startsWith("mod")) {
-                        mod = extractValue(part);
-
-                    } else if (part.startsWith("room-id")) {
-                        roomId = extractValue(part);
-
-                    } else if (part.startsWith("subscriber")) {
-                        subscriber = extractValue(part);
-
-                    } else if (part.startsWith("tmi-sent-ts")) {
-                        sentTimestamp = extractValue(part);
-
-                    } else if (part.startsWith("turbo")) {
-                        turbo = extractValue(part);
-
-                    } else if (part.startsWith("user-id")) {
-                        userId = extractValue(part);
-
-                    } else if (part.startsWith("user-type")) {
-                        userType = extractValue(part);
-                        if (userType != null) {
-                            message = new Message(userType);
-                        }
-
-                    }
-                });
-            }
-
-            private String extractValue(String part) {
-                String[] split = part.split("=");
-                if (split.length > 1) {
-                    return split[1];
-                } else {
-                    return null;
-                }
-            }
-
-            private class Message {
-                private final String messageString;
-
-                public Message(String userType) {
-                    String msg;
-                    try {
-                        String interestingPart = userType.substring(userType.indexOf("PRIVMSG"), userType.length() - 1);
-                        msg = interestingPart.substring(interestingPart.indexOf(":") + 1, interestingPart.length() - 1);
-                    } catch (Exception e) {
-                        StormLogger.error("Error while parsing message, using dummy message", e);
-                        msg = "-error in the message-";
-                    }
-                    this.messageString = msg;
-                }
-            }
-        }
     }
 
 }

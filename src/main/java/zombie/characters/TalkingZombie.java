@@ -33,8 +33,8 @@ public class TalkingZombie {
      */
     public void assignTwitchUser(TwitchChatter twitchChatter) {
         if (zombie != null && IsoPlayer.getInstance() != null) {
-            StormLogger.info(String.format("Assigning user %s to Zombie %s, isRendered(): %s, zombie.DistTo(IsoPlayer.getInstance()): %s",
-                    twitchChatter.getName(), getZombieID(), isRendered(), zombie.DistTo(IsoPlayer.getInstance())));
+            StormLogger.info(String.format("Assigning user %s to Zombie %s, isTargetVisible(): %s, zombie.DistTo(IsoPlayer.getInstance()): %s",
+                    twitchChatter.getName(), getZombieID(), isTargetVisible(), zombie.DistTo(IsoPlayer.getInstance())));
         } else {
             StormLogger.info("Assigning twitch chatter " + twitchChatter.getName());
         }
@@ -89,20 +89,20 @@ public class TalkingZombie {
 
     public boolean isInRangeOfPlayer() {
         if (zombie != null && IsoPlayer.getInstance() != null) {
-            return (isRendered()) && zombie.DistTo(IsoPlayer.getInstance()) < MAX_DISTANCE;
+            return (isTargetVisible()) && zombie.DistTo(IsoPlayer.getInstance()) < MAX_DISTANCE;
         }
         return false;
     }
 
-    private boolean isRendered() {
-        return (zombie.getAlpha() > 0.2f);
+    private boolean isTargetVisible() {
+        return zombie.isTargetVisible();
     }
 
     public void unassign() {
         if (twitchChatter != null) {
             if (zombie != null && IsoPlayer.getInstance() != null) {
-                StormLogger.info(String.format("unassigning user %s from Zombie %s, isRendered(): %s, zombie.DistTo(IsoPlayer.getInstance()): %s",
-                        twitchChatter.getName(), getZombieID(), isRendered(), zombie.DistTo(IsoPlayer.getInstance())));
+                StormLogger.info(String.format("unassigning user %s from Zombie %s, isTargetVisible(): %s, zombie.DistTo(IsoPlayer.getInstance()): %s",
+                        twitchChatter.getName(), getZombieID(), isTargetVisible(), zombie.DistTo(IsoPlayer.getInstance())));
             } else {
                 StormLogger.info(String.format("unassigning user %s from Zombie %s", twitchChatter.getName(), getZombieID()));
             }

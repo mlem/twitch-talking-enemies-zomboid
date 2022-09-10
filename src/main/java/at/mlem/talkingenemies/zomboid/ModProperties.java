@@ -26,9 +26,10 @@ public class ModProperties {
 
     private static Properties properties;
 
-    {
+    static {
         properties = loadProperties();
     }
+
     public ModProperties(Boolean debug, String botName, String channelName, String oauthToken, String blacklist) {
         this.debug = debug;
         this.botName = botName;

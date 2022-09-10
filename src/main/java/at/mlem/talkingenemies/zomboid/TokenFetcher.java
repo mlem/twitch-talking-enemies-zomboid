@@ -18,8 +18,7 @@ public class TokenFetcher {
     public static void main(String[] args) throws IOException {
         AtomicReference<Boolean> isRunning = new AtomicReference<>();
         isRunning.set(true);
-        String token = fetchNewToken();
-        ModProperties hello = new ModProperties(false, "hello", "https://twitch.tv/admiralbulldog", token, "");
+        ModProperties hello = new ModProperties();
         TwitchChatBotClient.listenToTwitchChat(hello, new TwitchChatBotClient.ChatListener() {
             @Override
             public void onText(String user, String message) {
