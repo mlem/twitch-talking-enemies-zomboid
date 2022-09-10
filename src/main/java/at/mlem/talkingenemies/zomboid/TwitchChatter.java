@@ -76,7 +76,4 @@ public class TwitchChatter {
         return colorInfo;
     }
 
-    public TalkingZombie getZombie() {
-        return assignedZombie;
-    }
 }

@@ -8,8 +8,6 @@ import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -42,7 +40,7 @@ public class TwitchChatBotClient {
         void stop();
     }
 
-    public static void listenToTwitchChat(Args arguments, ChatListener chatListener) {
+    public static void listenToTwitchChat(ModProperties arguments, ChatListener chatListener) {
         if (client == null) {
             client = createClient();
 
@@ -68,22 +66,25 @@ public class TwitchChatBotClient {
 
     private static class WebSocketListener implements WebSocket.Listener {
         private final String channelName;
-        private final String oauthToken;
+        private String oauthToken;
         private final String botName;
         private final boolean debug;
+        private ModProperties modProperties;
         private ChatListener chatListener;
         private boolean shutdown;
 
-        public WebSocketListener(Args arguments, ChatListener chatListener) {
-            this.channelName = arguments.channelName;
-            this.botName = arguments.botName;
-            this.oauthToken = arguments.oauthToken;
-            this.debug = arguments.debug;
+        public WebSocketListener(ModProperties modProperties, ChatListener chatListener) {
+            this.channelName = modProperties.getChannelName();
+            this.botName = modProperties.getBotName();
+            this.oauthToken = modProperties.getOauthToken();
+            this.debug = modProperties.getDebug();
+            this.modProperties = modProperties;
             this.chatListener = chatListener;
         }
 
         @Override
         public void onOpen(WebSocket webSocket) {
+            validateAndUpdateToken();
             if (shutdown) {
                 webSocket.abort();
                 return;
@@ -95,6 +96,14 @@ public class TwitchChatBotClient {
             sendText(webSocket, "NICK " + botName);
             sendText(webSocket, "JOIN #" + channelName);
 
+        }
+
+        private void validateAndUpdateToken() {
+            if(!TokenValidator.isTokenValid(oauthToken)) {
+                oauthToken = TokenFetcher.fetchNewToken();
+                modProperties.setOauthToken(oauthToken);
+                modProperties.saveProperties();
+            }
         }
 
         private CompletableFuture<WebSocket> sendText(WebSocket webSocket, String s) {
@@ -291,67 +300,4 @@ public class TwitchChatBotClient {
         }
     }
 
-    public static class Args {
-
-        private Boolean debug;
-        private String botName;
-        private String channelName;
-        private String oauthToken;
-
-        private List<String> blacklist;
-
-        public Args(Boolean debug, String botName, String channelName, String oauthToken, String blacklist) {
-            this.debug = debug;
-            this.botName = botName;
-            this.channelName = channelName(channelName);
-            this.oauthToken = oauthToken;
-            this.blacklist = Arrays.stream(blacklist.split(",")).toList();
-        }
-
-        public Args(String[] args) {
-            StormLogger.info(
-                    String.format(
-                            "Command line args passed: %s",
-                            Arrays.stream(args).collect(joining(" ; "))
-                    )
-            );
-            if (args.length >= 3) {
-                channelName = channelName(args[0]);
-                oauthToken = args[1];
-                botName = args[2];
-                if (args.length >= 4) {
-                    debug = debug(args[3]);
-                } else {
-                    debug = Boolean.FALSE;
-                }
-            }
-        }
-
-        private static Boolean debug(String debugString) {
-            return Boolean.valueOf(debugString);
-        }
-
-        private static String channelName(String channelUrl) {
-            String[] split = channelUrl.split("/");
-            return split[split.length - 1];
-        }
-
-        public Args(Properties properties) {
-            this(
-                    debug(properties.getProperty("debug")),
-                    properties.getProperty("botName"),
-                    channelName(properties.getProperty("channelName")),
-                    properties.getProperty("oauthToken"),
-                    properties.getProperty("blacklist"));
-        }
-
-        public Boolean getDebug() {
-            return debug;
-        }
-
-
-        public List<String> getBlacklist() {
-            return blacklist;
-        }
-    }
 }

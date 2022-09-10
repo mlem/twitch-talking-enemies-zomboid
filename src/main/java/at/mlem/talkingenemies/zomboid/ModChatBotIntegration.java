@@ -19,11 +19,10 @@ public class ModChatBotIntegration {
 
 
     public void startTwitchChat() {
-        Properties properties = loadProperties();
         twitchChatters = new HashMap<>();
         ZombieStore.resetStore();
         chatListener = new ModChatListener(twitchChatters);
-        TwitchChatBotClient.Args arguments = new TwitchChatBotClient.Args(properties);
+        ModProperties arguments = new ModProperties();
         Mod.debug = arguments.getDebug();
         blacklist = arguments.getBlacklist();
         TwitchChatBotClient.listenToTwitchChat(
@@ -32,20 +31,6 @@ public class ModChatBotIntegration {
         chatListener.start();
     }
 
-    private static Path getUserHomePath() {
-        return Paths.get(System.getProperty("user.home"));
-    }
-
-    private Properties loadProperties() {
-        Properties properties = new Properties();
-        try {
-            File propertiesFile = Paths.get(getUserHomePath().toString(), "Zomboid", "mods", "twitch-talking-enemies", "app.properties").toFile();
-            properties.load(new FileInputStream(propertiesFile));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return properties;
-    }
 
     public void stopTwitchChat() {
         twitchChatters = new HashMap<>();
