@@ -26,26 +26,17 @@ public class ModProperties {
 
     private static Properties properties;
 
-    static {
-        properties = loadProperties();
-    }
-
-    public ModProperties(Boolean debug, String botName, String channelName, String oauthToken, String blacklist) {
-        this.debug = debug;
-        this.botName = botName;
-        this.channelName = channelName(channelName);
-        this.oauthToken = oauthToken;
-        this.blacklist = Arrays.stream(blacklist.split(",")).toList();
-    }
-
 
     public ModProperties() {
-        this(
-                debug(properties.getProperty(DEBUG_PROPERTY)),
-                properties.getProperty(BOT_NAME_PROPERTY),
-                channelName(properties.getProperty(CHANNEL_NAME_PROPERTY)),
-                properties.getProperty(OAUTH_TOKEN_PROPERTY),
-                properties.getProperty(BLACKLIST_PROPERTY));
+        properties = loadProperties();
+        if(properties == null) {
+            properties = new Properties();
+        }
+        this.debug = debug(properties.getProperty(DEBUG_PROPERTY));
+        this.botName = properties.getProperty(BOT_NAME_PROPERTY);
+        this.channelName = channelName(channelName(properties.getProperty(CHANNEL_NAME_PROPERTY)));
+        this.oauthToken = properties.getProperty(OAUTH_TOKEN_PROPERTY);
+        this.blacklist = Arrays.stream(properties.getProperty(BLACKLIST_PROPERTY).split(",")).toList();
     }
 
     private static Boolean debug(String debugString) {
