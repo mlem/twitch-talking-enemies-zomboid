@@ -10,7 +10,7 @@ To install this mod, download the latest [release](https://github.com/mlem/twitc
 
 e.g. 
 ```
-unzip twitch-talking-enemies-0.0.1.zip -d ~/Zomboid/mods
+unzip twitch-talking-enemies-0.0.3.zip -d ~/Zomboid/mods
 ```
 
 You can see me playing with this mod sometimes at [my twitch channel](https://www.twitch.tv/mlem86)
