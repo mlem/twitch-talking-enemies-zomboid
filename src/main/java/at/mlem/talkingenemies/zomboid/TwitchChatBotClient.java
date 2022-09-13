@@ -140,31 +140,36 @@ public class TwitchChatBotClient {
             String[] messages = data.toString().split("\\r\\n");
             for (String receivedMessage : messages) {
                 System.out.println(receivedMessage);
-                TwitchChatParser.Message message = TwitchChatParser.toMessage(receivedMessage);
-                if (message == null) {
-                    return completionStage;
-                }
-                String command = message.command.getCommand();
-                if ("PRIVMSG".equals(command)) {
-                    if (message.command.botCommand != null) {
-                        // here comes the botCommand handling
-                    } else {
-                        if (message.parameters != null) {
-                            chatListener.onText(message.source.nick, message.parameters);
-                        }
+                try {
+                    TwitchChatParser.Message message = TwitchChatParser.toMessage(receivedMessage);
+
+                    if (message == null) {
+                        return completionStage;
                     }
-                } else if ("PING".equals(command)) {
-                    int indexOfLastDoppelpunkt = receivedMessage.lastIndexOf(":");
-                    String responsePong = "PONG " + receivedMessage.substring(indexOfLastDoppelpunkt, receivedMessage.length() - 1);
-                    webSocket.sendText(responsePong, true);
-                    if (debug)
-                        StormLogger.info("answering ping with: " + responsePong);
-                } else if ("NOTICE".equals(command)) {
-                    StormLogger.warn(String.format("Received NOTICE with following text: %s", receivedMessage));
-                } else if ("PART".equals(command)) {
-                    StormLogger.warn(String.format("Received PART (The channel must have banned (/ban) the bot) with following text: %s", receivedMessage));
-                } else if ("001".equals(command)) {
-                    StormLogger.info(String.format("Received 001 which means successfully logged in: %s", receivedMessage));
+                    String command = message.command.getCommand();
+                    if ("PRIVMSG".equals(command)) {
+                        if (message.command.botCommand != null) {
+                            // here comes the botCommand handling
+                        } else {
+                            if (message.parameters != null) {
+                                chatListener.onText(message.source.nick, message.parameters);
+                            }
+                        }
+                    } else if ("PING".equals(command)) {
+                        int indexOfLastColon = receivedMessage.lastIndexOf(":");
+                        String responsePong = "PONG " + receivedMessage.substring(indexOfLastColon, receivedMessage.length() - 1);
+                        webSocket.sendText(responsePong, true);
+                        if (debug)
+                            StormLogger.info("answering ping with: " + responsePong);
+                    } else if ("NOTICE".equals(command)) {
+                        StormLogger.warn(String.format("Received NOTICE with following text: %s", receivedMessage));
+                    } else if ("PART".equals(command)) {
+                        StormLogger.warn(String.format("Received PART (The channel must have banned (/ban) the bot) with following text: %s", receivedMessage));
+                    } else if ("001".equals(command)) {
+                        StormLogger.info(String.format("Received 001 which means successfully logged in: %s", receivedMessage));
+                    }
+                } catch (Exception e) {
+                    StormLogger.error(String.format("Problem with the message \"%s\"", receivedMessage));
                 }
             }
             return completionStage;
