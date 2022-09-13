@@ -59,10 +59,10 @@ jobs:
         run: mvn -B assembly:single
       # Upload dist artifacts as run artifacts
       - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: Artifacts
-        path: |
-         target/*.jar
-         target/*.tar
-         target/*.zip
+        uses: actions/upload-artifact@v3
+        with:
+          name: Artifacts
+          path: |
+           target/*.jar
+           target/*.tar
+           target/*.zip
