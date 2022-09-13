@@ -37,4 +37,28 @@ debug=false
 botName=hello
 channelName=https://twitch.tv/mlem86
 oauthToken=<someRandomCharacters>
+blacklist=someBot,anotherBot,...
 ```
+
+## Properties explained
+
+### debug
+
+ Zombies say some debug output, debug in logging is enabled.
+ 
+### botName
+
+The IRC Name which is chosen, has no influence on the twitch-chat.
+
+### channelName
+
+The channel name this mod is listening to.
+
+### oauthToken
+
+Used to authenticate yourself with the IRC Channel.
+
+### blacklist
+
+A comma seperated list of blacklisted names. If a user or bot with such a name writes something in chat, it will not
+be sayed by a zombie.

@@ -13,43 +13,36 @@ import java.util.Random;
 
 public class TalkingZombie {
 
-    public static final ColorInfo ASSIGNABLE_COLOR = new ColorInfo(237 / 255f, 107 / 255f, 244 / 255f, 0.5f);
-    public static final ColorInfo ASSIGNED_COLOR = new ColorInfo(191 / 255f, 148 / 255f, 1.0f, 0.5f);
-    public static final int MAX_DISTANCE_UNTIL_UNASSIGN = 10;
+    public static final int MAX_DISTANCE = 15;
     private IsoZombie zombie;
-
-    private ColorInfo colorInfo;
 
     private Queue<String> messages = new ArrayDeque<>();
 
     private TwitchChatter twitchChatter;
-    private long lastSeenSecond;
+    private long lastSpoken = 0;
 
     public TalkingZombie(IsoZombie zombie) {
 
         this.zombie = zombie;
-        Random random = new Random();
-        this.colorInfo = new ColorInfo(
-                random.nextFloat(),
-                random.nextFloat(),
-                random.nextFloat(),
-                random.nextFloat());
-        this.zombie.setHighlightColor(ASSIGNABLE_COLOR);
-        this.zombie.setHighlighted(true);
-        this.zombie.setOutlineHighlightCol(ASSIGNABLE_COLOR);
-        this.zombie.setOutlineHighlight(true);
-        this.zombie.setOutlineHlAttached(false);
     }
 
+    /**
+     * Should be used only by TwitchChatter
+     *
+     * @param twitchChatter
+     */
     public void assignTwitchUser(TwitchChatter twitchChatter) {
-        System.out.println("Assigning twitch chatter " + twitchChatter.getName());
-        this.twitchChatter = twitchChatter;
-        this.zombie.setHighlightColor(ASSIGNED_COLOR);
-        this.zombie.setHighlighted(true);
-        this.zombie.setOutlineHighlightCol(ASSIGNED_COLOR);
-        this.zombie.setOutlineHighlight(true);
-        this.zombie.setOutlineHlAttached(false);
-        this.lastSeenSecond = Instant.now().getEpochSecond();
+        if (zombie != null && IsoPlayer.getInstance() != null) {
+            StormLogger.info(String.format("Assigning user %s to Zombie %s, isTargetVisible(): %s, zombie.DistTo(IsoPlayer.getInstance()): %s",
+                    twitchChatter.getName(), getZombieID(), isTargetVisible(), zombie.DistTo(IsoPlayer.getInstance())));
+        } else {
+            StormLogger.info("Assigning twitch chatter " + twitchChatter.getName());
+        }
+           this.twitchChatter = twitchChatter;
+        ColorInfo colorInfo = colorInfo();
+        if (this.zombie.getName() != null) {
+            zombie.userName.setDefaultColors(colorInfo.r, colorInfo.g, colorInfo.b, colorInfo.a);
+        }
     }
 
 
@@ -61,44 +54,66 @@ public class TalkingZombie {
             zombie.userName = new TextDrawObject();
             zombie.userName.setAllowAnyImage(true);
             zombie.userName.setDefaultFont(UIFont.Small);
-            zombie.userName.setDefaultColors(colorInfo.r, colorInfo.g, colorInfo.b, colorInfo.a);
         }
 
     }
 
 
     public void say(String message) {
-        zombie.Say(message, colorInfo.r, colorInfo.g, colorInfo.b, null, 180, "radio");
+        ColorInfo colorInfo = colorInfo();
+        zombie.Say(message, colorInfo.r, colorInfo.g, colorInfo.b, null, 180f, "radio");
+        zombie.setLastSpokenLine(message);
+    }
+
+    private ColorInfo colorInfo() {
+        ColorInfo colorInfo = null;
+        if (twitchChatter != null) {
+            colorInfo = twitchChatter.getColorInfo();
+        } else {
+            Random random = new Random();
+            colorInfo = new ColorInfo(random.nextFloat(), random.nextFloat(), random.nextFloat(), 0.9f);
+        }
+        return colorInfo;
     }
 
     public void sayTwitchChat() {
-        if (!messages.isEmpty() && twitchChatter != null) {
-            say(twitchChatter.getName() + ": " + messages.poll());
+        if (twitchChatter != null) {
+            twitchChatter.addMessagesFromBacklog();
+            if (!messages.isEmpty() && lastSpoken < Instant.now().getEpochSecond()) {
+                say(twitchChatter.getName() + ": " + messages.poll());
+                lastSpoken = Instant.now().getEpochSecond();
+            }
         }
     }
 
-
-    public boolean unassign() {
-        if(lastSeenSecond < Instant.now().getEpochSecond()-30 || !isInRangeOfPlayer()) {
-            forceUnassign();
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     public boolean isInRangeOfPlayer() {
-        return zombie.DistTo(IsoPlayer.getInstance()) < MAX_DISTANCE_UNTIL_UNASSIGN;
+        if (zombie != null && IsoPlayer.getInstance() != null) {
+            return (isTargetVisible()) && zombie.DistTo(IsoPlayer.getInstance()) < MAX_DISTANCE;
+        }
+        return false;
     }
 
-    public void forceUnassign() {
+    private boolean isTargetVisible() {
+        return zombie.isTargetVisible();
+    }
+
+    public void unassign() {
         if (twitchChatter != null) {
-            StormLogger.info("unassigning user " + twitchChatter.getName());
-            twitchChatter.unassign();
+            if (zombie != null && IsoPlayer.getInstance() != null) {
+                StormLogger.info(String.format("unassigning user %s from Zombie %s, isTargetVisible(): %s, zombie.DistTo(IsoPlayer.getInstance()): %s",
+                        twitchChatter.getName(), getZombieID(), isTargetVisible(), zombie.DistTo(IsoPlayer.getInstance())));
+            } else {
+                StormLogger.info(String.format("unassigning user %s from Zombie %s", twitchChatter.getName(), getZombieID()));
+            }
+            // returning messages to backlog
+            twitchChatter.unassign(messages);
             twitchChatter = null;
         }
-        this.zombie.setHighlighted(false);
-        this.zombie.setOutlineHighlight(false);
+        if (zombie != null) {
+            this.zombie.setHighlighted(false);
+            this.zombie.setOutlineHighlight(false);
+        }
         messages = new ArrayDeque<>();
     }
 
@@ -107,6 +122,11 @@ public class TalkingZombie {
     }
 
     public void addMessage(String message) {
+        if (twitchChatter != null) {
+            StormLogger.info(String.format("Adding message to zombie(%s): %s: %s", getZombieID(), twitchChatter.getName(), message));
+        } else {
+            StormLogger.info(String.format("Adding message to zombie(%s): %s", getZombieID(), message));
+        }
         messages.add(message);
     }
 
@@ -116,6 +136,10 @@ public class TalkingZombie {
         } else {
             return -1;
         }
+    }
+
+    public void clearChatter() {
+        twitchChatter = null;
     }
 }
 

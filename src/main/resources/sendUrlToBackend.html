@@ -1,0 +1,25 @@
+<html>
+<script>
+    function sendRequest() {
+        let location = window.location;
+        fetch(location.href.replace(/#/, "")).then(function(response) {
+            return response.json();
+        }).then(function(data) {
+            console.log(data);
+        }).catch(function(e) {
+            console.log(e);
+        });
+    }
+</script>
+<body>
+<p>
+    Sending token to Project Zomboid mod "twitch-talking-enemies"
+</p>
+<p>
+    It will be saved in your properties file.
+</p>
+<script>
+    sendRequest();
+</script>
+</body>
+</html>
