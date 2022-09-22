@@ -16,13 +16,7 @@
             </includes>
             <outputDirectory>/twitch-talking-enemies</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}</directory>
-            <outputDirectory>/twitch-talking-enemies</outputDirectory>
-            <includes>
-                <include>*.jar</include>
-            </includes>
-        </fileSet>
+
         <fileSet>
             <directory>.</directory>
             <includes>
@@ -38,4 +32,11 @@
             <outputDirectory>/twitch-talking-enemies</outputDirectory>
         </fileSet>
     </fileSets>
+    <files>
+        <file>
+            <source>${project.build.directory}/${project.build.finalName}.jar</source>
+            <outputDirectory>/twitch-talking-enemies</outputDirectory>
+            <destName>twitch-talking-enemies.jar</destName>
+        </file>
+    </files>
 </assembly>
