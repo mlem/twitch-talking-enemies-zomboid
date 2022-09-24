@@ -1,0 +1,9 @@
+GET https://id.twitch.tv/oauth2/validate
+Authorization: OAuth
+
+
+###
+
+GET https://api.twitch.tv/helix/users?login=twitchdev
+Authorization: Bearer
+Client-Id: f1sjgf9y0ytdx2re1oapwfs7l11lh3
