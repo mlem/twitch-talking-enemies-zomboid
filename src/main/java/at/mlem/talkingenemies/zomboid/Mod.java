@@ -10,8 +10,6 @@ import zombie.characters.IsoGameCharacter;
 import zombie.characters.IsoZombie;
 import zombie.characters.TalkingZombie;
 
-import java.util.*;
-
 public class Mod implements ZomboidMod {
 
     private ModChatBotIntegration modChatBotIntegration;

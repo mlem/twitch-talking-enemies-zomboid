@@ -2,12 +2,10 @@ package at.mlem.talkingenemies.zomboid;
 
 import io.pzstorm.storm.logging.StormLogger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class ModChatBotIntegration {
 
@@ -23,14 +21,32 @@ public class ModChatBotIntegration {
         ZombieStore.resetStore();
         chatListener = new ModChatListener(twitchChatters);
         ModProperties arguments = new ModProperties();
+        validateAndUpdateToken(arguments);
         Mod.debug = arguments.getDebug();
         blacklist = arguments.getBlacklist();
+
         TwitchChatBotClient.listenToTwitchChat(
                 arguments,
                 chatListener);
         chatListener.start();
     }
 
+    private void validateAndUpdateToken(ModProperties modProperties) {
+        String oauthToken = modProperties.getOauthToken();
+        TokenValidator.ValidatorResult result = TokenValidator.validateToken(oauthToken);
+        if (!result.isValid) {
+            oauthToken = TokenFetcher.fetchNewToken();
+            result = TokenValidator.validateToken(oauthToken);
+            modProperties.setOauthToken(oauthToken);
+            if (result.login != null) {
+                modProperties.setChannelName(result.login);
+            } else {
+                modProperties.setChannelName("");
+            }
+            modProperties.saveProperties();
+            StormLogger.info("saving properties");
+        }
+    }
 
     public void stopTwitchChat() {
         twitchChatters = new HashMap<>();
@@ -56,7 +72,7 @@ public class ModChatBotIntegration {
 
         @Override
         public void onText(String user, String message) {
-            if(blacklist.contains(user)) {
+            if (blacklist.contains(user)) {
                 return;
             }
             TwitchChatter twitchChatter = twitchChatters.computeIfAbsent(user, u -> new TwitchChatter(user));
