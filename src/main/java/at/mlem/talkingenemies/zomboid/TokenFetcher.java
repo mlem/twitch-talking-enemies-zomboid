@@ -18,8 +18,8 @@ public class TokenFetcher {
     public static void main(String[] args) throws IOException {
         AtomicReference<Boolean> isRunning = new AtomicReference<>();
         isRunning.set(true);
-        ModProperties hello = new ModProperties();
-        TwitchChatBotClient.listenToTwitchChat(hello, new TwitchChatBotClient.ChatListener() {
+        ModProperties properties = new ModProperties();
+        TwitchChatBotClient.listenToTwitchChat(properties, new TwitchChatBotClient.ChatListener() {
             @Override
             public void onText(String user, String message) {
                 System.out.println(user + ": " + message);

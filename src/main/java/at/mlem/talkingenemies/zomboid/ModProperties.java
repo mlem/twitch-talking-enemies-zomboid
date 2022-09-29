@@ -29,14 +29,21 @@ public class ModProperties {
 
     public ModProperties() {
         properties = loadProperties();
-        if(properties == null) {
+        if (properties == null) {
             properties = new Properties();
+            this.debug = false;
+            this.botName = "IIRC-Botname";
+            this.channelName = "";
+            this.oauthToken = "";
+            this.blacklist = List.of();
+
+        } else {
+            this.debug = debug(properties.getProperty(DEBUG_PROPERTY));
+            this.botName = properties.getProperty(BOT_NAME_PROPERTY);
+            this.channelName = channelName(properties.getProperty(CHANNEL_NAME_PROPERTY));
+            this.oauthToken = properties.getProperty(OAUTH_TOKEN_PROPERTY);
+            this.blacklist = Arrays.stream(properties.getProperty(BLACKLIST_PROPERTY).split(",")).toList();
         }
-        this.debug = debug(properties.getProperty(DEBUG_PROPERTY));
-        this.botName = properties.getProperty(BOT_NAME_PROPERTY);
-        this.channelName = channelName(channelName(properties.getProperty(CHANNEL_NAME_PROPERTY)));
-        this.oauthToken = properties.getProperty(OAUTH_TOKEN_PROPERTY);
-        this.blacklist = Arrays.stream(properties.getProperty(BLACKLIST_PROPERTY).split(",")).toList();
     }
 
     private static Boolean debug(String debugString) {
@@ -53,10 +60,14 @@ public class ModProperties {
     }
 
     private static Properties loadProperties() {
-        Properties properties = new Properties();
+        Properties properties = null;
         try {
             File propertiesFile = propertiesFile();
-            properties.load(new FileInputStream(propertiesFile));
+            if (propertiesFile.exists() && propertiesFile.canRead()) {
+                properties = new Properties();
+                properties.load(new FileInputStream(propertiesFile));
+                StormLogger.info("loaded properties from " + propertiesFile.getAbsolutePath());
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -66,7 +77,7 @@ public class ModProperties {
     }
 
     private static File propertiesFile() {
-        return Paths.get(getUserHomePath().toString(), "Zomboid", "mods", "twitch-talking-enemies", "app.properties").toFile();
+        return Paths.get(getUserHomePath().toString(), "Zomboid", "twitch.properties").toFile();
     }
 
     public Boolean getDebug() {
@@ -101,10 +112,16 @@ public class ModProperties {
         properties.setProperty(OAUTH_TOKEN_PROPERTY, oauthToken);
         properties.setProperty(BLACKLIST_PROPERTY, blacklist.stream().collect(Collectors.joining(",")));
 
+        File propertiesFile = propertiesFile();
         try {
-            properties.store(new FileOutputStream(propertiesFile()), null);
+            properties.store(new FileOutputStream(propertiesFile), null);
+            StormLogger.info("Saved properties to " + propertiesFile.getAbsolutePath());
         } catch (IOException e) {
-            StormLogger.error("couldn't write properties back to " + propertiesFile().getAbsolutePath(), e);
+            StormLogger.error("couldn't write properties back to " + propertiesFile.getAbsolutePath(), e);
         }
+    }
+
+    public void setChannelName(String channelName) {
+        this.channelName = channelName;
     }
 }

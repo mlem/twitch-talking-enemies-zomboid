@@ -7,11 +7,8 @@ import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-
-import static java.util.stream.Collectors.joining;
 
 /**
  * to get a token, call https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=f1sjgf9y0ytdx2re1oapwfs7l11lh3&redirect_uri=http://localhost&scope=chat%3Aread+chat%3Aedit
@@ -54,10 +51,7 @@ public class TwitchChatBotClient {
     }
 
     private static HttpClient createClient() {
-        //SSLContext instance = getSslContext();
-
         return HttpClient.newBuilder()
-                // .sslContext(instance)
                 .version(HttpClient.Version.HTTP_1_1)
                 .connectTimeout(Duration.ofSeconds(20))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
@@ -80,11 +74,11 @@ public class TwitchChatBotClient {
             this.debug = modProperties.getDebug();
             this.modProperties = modProperties;
             this.chatListener = chatListener;
+            validateAndUpdateToken();
         }
 
         @Override
         public void onOpen(WebSocket webSocket) {
-            validateAndUpdateToken();
             if (shutdown) {
                 webSocket.abort();
                 return;
@@ -99,9 +93,15 @@ public class TwitchChatBotClient {
         }
 
         private void validateAndUpdateToken() {
-            if (!TokenValidator.isTokenValid(oauthToken)) {
+            TokenValidator.ValidatorResult result = TokenValidator.validateToken(oauthToken);
+            if (!result.isValid) {
                 oauthToken = TokenFetcher.fetchNewToken();
                 modProperties.setOauthToken(oauthToken);
+                if (result.login != null) {
+                    modProperties.setChannelName(result.login);
+                } else {
+                    modProperties.setChannelName("");
+                }
                 modProperties.saveProperties();
                 System.out.println("saving properties");
             }
