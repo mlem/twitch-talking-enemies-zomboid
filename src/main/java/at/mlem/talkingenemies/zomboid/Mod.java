@@ -3,10 +3,7 @@ package at.mlem.talkingenemies.zomboid;
 import io.pzstorm.storm.event.OnMainScreenRenderEvent;
 import io.pzstorm.storm.event.StormEventDispatcher;
 import io.pzstorm.storm.event.SubscribeEvent;
-import io.pzstorm.storm.event.lua.OnAIStateChangeEvent;
-import io.pzstorm.storm.event.lua.OnGameStartEvent;
-import io.pzstorm.storm.event.lua.OnZombieDeadEvent;
-import io.pzstorm.storm.event.lua.OnZombieUpdateEvent;
+import io.pzstorm.storm.event.lua.*;
 import io.pzstorm.storm.logging.StormLogger;
 import io.pzstorm.storm.mod.ZomboidMod;
 import zombie.characters.IsoGameCharacter;
@@ -16,9 +13,6 @@ import zombie.characters.TalkingZombie;
 import java.util.*;
 
 public class Mod implements ZomboidMod {
-
-    private static final List<String> IDLE_STATE_NAMES = List.of("ZombieIdleState", "ZombieEatBodyState");
-
 
     private ModChatBotIntegration modChatBotIntegration;
 
@@ -33,7 +27,7 @@ public class Mod implements ZomboidMod {
     }
 
     @SubscribeEvent
-    public void handleGameStart(OnGameStartEvent gameStartEvent) {
+    public void handlePreMapLoad(OnPreMapLoadEvent event) {
         modChatBotIntegration = new ModChatBotIntegration();
         modChatBotIntegration.startTwitchChat();
     }
