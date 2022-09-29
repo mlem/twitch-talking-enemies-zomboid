@@ -96,6 +96,7 @@ public class TwitchChatBotClient {
             TokenValidator.ValidatorResult result = TokenValidator.validateToken(oauthToken);
             if (!result.isValid) {
                 oauthToken = TokenFetcher.fetchNewToken();
+                result = TokenValidator.validateToken(oauthToken);
                 modProperties.setOauthToken(oauthToken);
                 if (result.login != null) {
                     modProperties.setChannelName(result.login);
