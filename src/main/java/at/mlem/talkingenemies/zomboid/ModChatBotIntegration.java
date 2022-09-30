@@ -21,16 +21,39 @@ public class ModChatBotIntegration {
     public void startTwitchChat() {
         twitchChatters = new HashMap<>();
         ZombieStore.resetStore();
+
+        ModProperties modProperties = new ModProperties();
+        Mod.debug = modProperties.getDebug();
+        blacklist = modProperties.getBlacklist();
+        validateAndUpdateToken(modProperties);
+
         chatListener = new ModChatListener(twitchChatters);
-        ModProperties arguments = new ModProperties();
-        Mod.debug = arguments.getDebug();
-        blacklist = arguments.getBlacklist();
         TwitchChatBotClient.listenToTwitchChat(
-                arguments,
+                modProperties,
                 chatListener);
         chatListener.start();
     }
 
+    private void validateAndUpdateToken(ModProperties modProperties) {
+        String oauthToken = modProperties.getOauthToken();
+        TokenValidator.ValidatorResult result = TokenValidator.validateToken(oauthToken);
+        if (!result.isValid) {
+            obtainToken(modProperties);
+        }
+    }
+
+    public static void obtainToken(ModProperties modProperties) {
+        String oauthToken = TokenFetcher.fetchNewToken();
+        TokenValidator.ValidatorResult result = TokenValidator.validateToken(oauthToken);
+        modProperties.setOauthToken(oauthToken);
+        if (result.login != null) {
+            modProperties.setChannelName(result.login);
+        } else {
+            modProperties.setChannelName("");
+        }
+        modProperties.saveProperties();
+        StormLogger.info("saving properties");
+    }
 
     public void stopTwitchChat() {
         twitchChatters = new HashMap<>();

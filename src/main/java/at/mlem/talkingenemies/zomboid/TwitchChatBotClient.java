@@ -74,7 +74,6 @@ public class TwitchChatBotClient {
             this.debug = modProperties.getDebug();
             this.modProperties = modProperties;
             this.chatListener = chatListener;
-            validateAndUpdateToken();
         }
 
         @Override
@@ -92,21 +91,6 @@ public class TwitchChatBotClient {
 
         }
 
-        private void validateAndUpdateToken() {
-            TokenValidator.ValidatorResult result = TokenValidator.validateToken(oauthToken);
-            if (!result.isValid) {
-                oauthToken = TokenFetcher.fetchNewToken();
-                result = TokenValidator.validateToken(oauthToken);
-                modProperties.setOauthToken(oauthToken);
-                if (result.login != null) {
-                    modProperties.setChannelName(result.login);
-                } else {
-                    modProperties.setChannelName("");
-                }
-                modProperties.saveProperties();
-                System.out.println("saving properties");
-            }
-        }
 
         private CompletableFuture<WebSocket> sendText(WebSocket webSocket, String s) {
             if (shutdown) {
