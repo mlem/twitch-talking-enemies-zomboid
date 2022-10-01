@@ -38,6 +38,7 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <pz.version>41.71</pz.version>
     </properties>
 
     <dependencies>
@@ -45,12 +46,12 @@
         <dependency>
             <groupId>at.mlem</groupId>
             <artifactId>storm-api</artifactId>
-            <version>0.2.5</version>
+            <version>0.2.7</version>
         </dependency>
         <dependency>
             <groupId>zomboid</groupId>
             <artifactId>zomboid</artifactId>
-            <version>41.71</version>
+            <version>${pz.version}</version>
             <scope>system</scope>
             <systemPath>${basedir}/lib/zomboid.jar</systemPath>
         </dependency>
