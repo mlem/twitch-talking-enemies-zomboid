@@ -5,7 +5,7 @@
 
     <artifactId>twitch-talking-enemies-zomboid</artifactId>
     <groupId>at.mlem</groupId>
-    <version>0.0.7</version>
+    <version>0.0.8</version>
 
     <name>Twitch Talking Enemies Zomboid</name>
     <description>The maven main core project description</description>
