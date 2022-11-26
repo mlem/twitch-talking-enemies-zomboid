@@ -2,16 +2,13 @@ package at.mlem.talkingenemies.zomboid;
 
 import io.pzstorm.storm.logging.StormLogger;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TokenValidator {
 
@@ -32,7 +29,7 @@ public class TokenValidator {
             System.out.println(response.body());
             ok.set(response.statusCode() == 200);
             String fullString = response.body().replaceAll("\n", "");
-            String loginValuePair = Arrays.stream(fullString.split(",")).filter(x -> x.contains("login")).findFirst().orElse(null);
+            String loginValuePair = Arrays.stream(fullString.split(",")).filter(x -> x.contains("login")).findFirst().orElseThrow(() -> new IOException("Couldn't find login"));
             String rawValue = loginValuePair.split(":")[1].trim();
             String login = rawValue.substring(1, rawValue.length()-1).trim();
             ValidatorResult validatorResult = new ValidatorResult();
