@@ -63,7 +63,6 @@ public class TwitchChatBotClient {
         private String oauthToken;
         private final String botName;
         private final boolean debug;
-        private ModProperties modProperties;
         private ChatListener chatListener;
         private boolean shutdown;
 
@@ -72,7 +71,6 @@ public class TwitchChatBotClient {
             this.botName = modProperties.getBotName();
             this.oauthToken = modProperties.getOauthToken();
             this.debug = modProperties.getDebug();
-            this.modProperties = modProperties;
             this.chatListener = chatListener;
         }
 

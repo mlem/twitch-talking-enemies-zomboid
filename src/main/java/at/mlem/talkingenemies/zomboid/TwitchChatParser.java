@@ -290,6 +290,26 @@ public class TwitchChatParser {
     }
 
     class Tags {
+
+        //@badge-info=;
+        // badges=;
+        // client-nonce=abcdef0123456798;
+        // color=#FF59AC;
+        // display-name=mlem86;
+        // emotes=;
+        // first-msg=0;
+        // flags=;
+        // id=7efe2921-72fb-4f9c-b0e2-4775fc4d1a7e;
+        // mod=0;
+        // returning-chatter=0;
+        // room-id=205373393;
+        // subscriber=0;
+        // tmi-sent-ts=1663180558417;
+        // turbo=0;
+        // user-id=1234;
+        // user-type=
+
+        public final static String COLOR = "color";
         private Map dictParsedTags;
 
         public Tags(Map dictParsedTags) {
