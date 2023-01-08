@@ -20,8 +20,9 @@ public class TokenFetcher {
         isRunning.set(true);
         ModProperties properties = new ModProperties();
         TwitchChatBotClient.listenToTwitchChat(properties, new TwitchChatBotClient.ChatListener() {
+
             @Override
-            public void onText(String user, String message) {
+            public void onText(String user, String message, Color color) {
                 System.out.println(user + ": " + message);
             }
 

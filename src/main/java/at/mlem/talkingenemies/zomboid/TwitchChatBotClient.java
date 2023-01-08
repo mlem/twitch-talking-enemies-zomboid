@@ -30,7 +30,7 @@ public class TwitchChatBotClient {
     }
 
     public interface ChatListener {
-        void onText(String user, String message);
+        void onText(String user, String message, Color color);
 
         void start();
 
@@ -135,7 +135,7 @@ public class TwitchChatBotClient {
                             // here comes the botCommand handling
                         } else {
                             if (message.parameters != null) {
-                                chatListener.onText(message.source.nick, message.parameters);
+                                chatListener.onText(message.source.nick, message.parameters, ColorParser.parseFromHex(message.tags.getColor()));
                             }
                         }
                     } else if ("PING".equals(command)) {

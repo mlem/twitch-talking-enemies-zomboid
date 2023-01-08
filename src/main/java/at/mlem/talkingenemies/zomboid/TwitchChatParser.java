@@ -315,6 +315,10 @@ public class TwitchChatParser {
         public Tags(Map dictParsedTags) {
             this.dictParsedTags = dictParsedTags;
         }
+
+        public String getColor() {
+            return (String) dictParsedTags.getOrDefault("color", "");
+        }
     }
 
     public class Position {

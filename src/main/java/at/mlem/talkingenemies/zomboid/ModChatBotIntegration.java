@@ -2,11 +2,6 @@ package at.mlem.talkingenemies.zomboid;
 
 import io.pzstorm.storm.logging.StormLogger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class ModChatBotIntegration {
@@ -78,11 +73,11 @@ public class ModChatBotIntegration {
 
 
         @Override
-        public void onText(String user, String message) {
+        public void onText(String user, String message, Color color) {
             if(blacklist.contains(user)) {
                 return;
             }
-            TwitchChatter twitchChatter = twitchChatters.computeIfAbsent(user, u -> new TwitchChatter(user));
+            TwitchChatter twitchChatter = twitchChatters.computeIfAbsent(user, u -> new TwitchChatter(user, color));
 
             if (listenToMessages) {
                 if (!twitchChatter.hasZombie()) {
