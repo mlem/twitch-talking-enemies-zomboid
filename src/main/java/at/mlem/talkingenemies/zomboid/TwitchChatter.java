@@ -18,14 +18,13 @@ public class TwitchChatter {
     private Queue<String> messageBacklog = new ArrayDeque<>();
 
     private TalkingZombie assignedZombie;
-    private Random random = new Random();
 
-    public TwitchChatter(String name) {
+    public TwitchChatter(String name, Color color) {
         this.name = name;
         this.colorInfo = new ColorInfo(
-                random.nextFloat(),
-                random.nextFloat(),
-                random.nextFloat(),
+                color.r(),
+                color.g(),
+                color.b(),
                 0.9f);
     }
 

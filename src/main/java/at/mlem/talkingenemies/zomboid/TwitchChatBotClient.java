@@ -30,7 +30,7 @@ public class TwitchChatBotClient {
     }
 
     public interface ChatListener {
-        void onText(String user, String message);
+        void onText(String user, String message, Color color);
 
         void start();
 
@@ -63,7 +63,6 @@ public class TwitchChatBotClient {
         private String oauthToken;
         private final String botName;
         private final boolean debug;
-        private ModProperties modProperties;
         private ChatListener chatListener;
         private boolean shutdown;
 
@@ -72,9 +71,7 @@ public class TwitchChatBotClient {
             this.botName = modProperties.getBotName();
             this.oauthToken = modProperties.getOauthToken();
             this.debug = modProperties.getDebug();
-            this.modProperties = modProperties;
             this.chatListener = chatListener;
-            validateAndUpdateToken();
         }
 
         @Override
@@ -92,21 +89,6 @@ public class TwitchChatBotClient {
 
         }
 
-        private void validateAndUpdateToken() {
-            TokenValidator.ValidatorResult result = TokenValidator.validateToken(oauthToken);
-            if (!result.isValid) {
-                oauthToken = TokenFetcher.fetchNewToken();
-                result = TokenValidator.validateToken(oauthToken);
-                modProperties.setOauthToken(oauthToken);
-                if (result.login != null) {
-                    modProperties.setChannelName(result.login);
-                } else {
-                    modProperties.setChannelName("");
-                }
-                modProperties.saveProperties();
-                System.out.println("saving properties");
-            }
-        }
 
         private CompletableFuture<WebSocket> sendText(WebSocket webSocket, String s) {
             if (shutdown) {
@@ -153,7 +135,7 @@ public class TwitchChatBotClient {
                             // here comes the botCommand handling
                         } else {
                             if (message.parameters != null) {
-                                chatListener.onText(message.source.nick, message.parameters);
+                                chatListener.onText(message.source.nick, message.parameters, ColorParser.parseFromHex(message.tags.getColor()));
                             }
                         }
                     } else if ("PING".equals(command)) {

@@ -47,8 +47,7 @@ public class TalkingZombie {
 
 
     public void initTextObjects() {
-        zombie.initTextObjects();
-        zombie.chatElement.setMaxChatLines(5);
+        zombie.updateTextObjects();
 
         if (this.zombie.getName() != null) {
             zombie.userName = new TextDrawObject();
