@@ -50,19 +50,23 @@ jobs:
       # Apply correct permissions for lib directory
       - name: Apply directory permissions
         run: sudo chmod a+rwx ./lib
+      # Install PZ to local maven Repo
+      - name: Install PZ to local maven repo
+        run: mvn install:install-file -Dfile=./lib/zomboid.jar -DgroupId=zomboid -DartifactId=zomboid -Dversion=${{ env.PZ_VERSION }} -Dpackaging=jar
       # Build jar file
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
       # build zip/tar file and deploy it
       - name: Publish to GitHub Packages Apache Maven
-        run: mvn -B assembly:single
+        run: mvn --projects pz-mod -B assembly:single
       # Upload dist artifacts as run artifacts
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: Artifacts
           path: |
-           target/*.jar
-           target/*.tar
-           target/*.zip
+           pz-mod/target/*.jar
+           pz-mod/target/*.tar
+           pz-mod/target/*.zip
+           

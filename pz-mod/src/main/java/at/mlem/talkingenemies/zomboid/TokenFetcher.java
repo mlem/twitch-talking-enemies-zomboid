@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class TokenFetcher {
@@ -19,7 +20,7 @@ public class TokenFetcher {
         AtomicReference<Boolean> isRunning = new AtomicReference<>();
         isRunning.set(true);
         ModProperties properties = new ModProperties();
-        TwitchChatBotClient.listenToTwitchChat(properties, new TwitchChatBotClient.ChatListener() {
+        TwitchChatBotClient.ChatListener chatListener = new TwitchChatBotClient.ChatListener() {
 
             @Override
             public void onText(String user, String message, Color color) {
@@ -37,7 +38,13 @@ public class TokenFetcher {
                 System.out.println("stopped");
                 isRunning.set(false);
             }
-        });
+
+            @Override
+            public void init(Map<String, TwitchChatter> twitchChatters) {
+                // ignore this method
+            }
+        };
+        TwitchChatBotClient.listenToTwitchChat(properties, Map.of());
         while(isRunning.get()) {
 
         }

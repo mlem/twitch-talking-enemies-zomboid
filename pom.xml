@@ -4,8 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <artifactId>twitch-talking-enemies-zomboid</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>tts-backend</module>
+        <module>pz-mod</module>
+    </modules>
     <groupId>at.mlem</groupId>
-    <version>0.0.9</version>
+    <version>0.0.10</version>
 
     <name>Twitch Talking Enemies Zomboid</name>
     <description>The maven main core project description</description>
@@ -35,61 +40,20 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <pz.version>41.71</pz.version>
     </properties>
 
-    <dependencies>
-        <!-- https://mvnrepository.com/artifact/at.mlem/storm-api -->
-        <dependency>
-            <groupId>at.mlem</groupId>
-            <artifactId>storm-api</artifactId>
-            <version>0.2.7</version>
-        </dependency>
-        <dependency>
-            <groupId>zomboid</groupId>
-            <artifactId>zomboid</artifactId>
-            <version>${pz.version}</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/zomboid.jar</systemPath>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.9.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.24.0</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-
     <build>
-        <finalName>twitch-talking-enemies-${project.version}</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M7</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/assembly/distribution.xml</descriptor>
-                    </descriptors>
-                    <appendAssemblyId>false</appendAssemblyId>
-                </configuration>
-            </plugin>
-        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
 </project>

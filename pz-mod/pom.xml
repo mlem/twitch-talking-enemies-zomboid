@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>twitch-talking-enemies-zomboid</artifactId>
+        <groupId>at.mlem</groupId>
+        <version>0.0.10</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>pz-mod</artifactId>
+
+    <properties>
+        <pz.version>41.76</pz.version>
+    </properties>
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/at.mlem/storm-api -->
+        <dependency>
+            <groupId>at.mlem</groupId>
+            <artifactId>storm-api</artifactId>
+            <version>0.2.7</version>
+        </dependency>
+        <dependency>
+            <!-- decompiled zomboid classes packaged to jar -->
+            <!-- locally they can be installed running capsid de-compilation and
+                 renaming the resulting jar into zomboid.jar, copying it to lib folder
+                  and running publish-zomboid.jar in lib directory -->
+            <!-- How it's installed on CI is described in .github\workflows\java-ci.yaml -->
+            <groupId>zomboid</groupId>
+            <artifactId>zomboid</artifactId>
+            <version>${pz.version}</version>
+        </dependency>
+
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.9.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.24.0</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>twitch-talking-enemies-${project.version}</finalName>
+        <plugins>
+            <!-- needed for tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M7</version>
+            </plugin>
+            <!-- packaging to .zip, .tar-->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assembly/distribution.xml</descriptor>
+                    </descriptors>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -7,7 +7,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="talking-zombies" />
-        <module name="zomboid" />
+        <module name="tts-backend" />
+        <module name="pz-mod" />
       </profile>
     </annotationProcessing>
   </component>

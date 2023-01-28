@@ -251,11 +251,11 @@ public class TwitchChatParser {
 
     Command parseParameters(String rawParametersComponent, Command command) {
         int idx = 0;
-        String commandParts = rawParametersComponent.substring(idx + 1).trim();
+        String commandParts = rawParametersComponent.substring(idx).trim();
         int paramsIdx = commandParts.indexOf(" ");
 
         if (-1 == paramsIdx) { // no parameters
-            command.botCommand = commandParts.substring(0);
+            command.botCommand = commandParts;
         } else {
             command.botCommand = commandParts.substring(0, paramsIdx);
             command.botCommandParams = commandParts.substring(paramsIdx).trim();
@@ -265,7 +265,7 @@ public class TwitchChatParser {
         return command;
     }
 
-    class Message {
+    public static class Message {
         public Command command;
         public Tags tags;
         public Source source;
@@ -289,7 +289,7 @@ public class TwitchChatParser {
         }
     }
 
-    class Tags {
+    public class Tags {
 
         //@badge-info=;
         // badges=;
@@ -332,8 +332,8 @@ public class TwitchChatParser {
         }
     }
 
-    class Source {
-        final String nick;
+    public static class Source {
+        public final String nick;
         final String host;
 
         public Source(String nick, String host) {

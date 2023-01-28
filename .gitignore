@@ -1,6 +1,5 @@
 *.iml
 workspace.xml
-/zomboid/lib/zomboid.jar
 .idea/
 target/
-/lib/*.jar
+lib/**/*.jar

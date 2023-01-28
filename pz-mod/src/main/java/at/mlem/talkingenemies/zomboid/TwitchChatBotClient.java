@@ -1,5 +1,6 @@
 package at.mlem.talkingenemies.zomboid;
 
+import at.mlem.talkingenemies.zomboid.command.BotCommandHandlers;
 import io.pzstorm.storm.logging.StormLogger;
 
 import java.net.URI;
@@ -7,6 +8,9 @@ import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -35,13 +39,42 @@ public class TwitchChatBotClient {
         void start();
 
         void stop();
+
+        void init(Map<String, TwitchChatter> twitchChatters);
     }
 
-    public static void listenToTwitchChat(ModProperties arguments, ChatListener chatListener) {
+    public static class ChatListeners {
+        private static List<ChatListener> chatListeners = new ArrayList<>();
+
+        public static void register(ChatListener chatListener) {
+            chatListeners.add(chatListener);
+        }
+
+        public static void init(Map<String, TwitchChatter> twitchChatters) {
+            chatListeners.forEach(listener -> listener.init(twitchChatters));
+        }
+
+        public static void handleOnText(String nick, String message, Color color) {
+            chatListeners.forEach(listener -> listener.onText(nick, message, color));
+
+        }
+
+        public static void start() {
+            chatListeners.forEach(ChatListener::start);
+        }
+
+        public static void stop() {
+            chatListeners.forEach(ChatListener::stop);
+            chatListeners.clear();
+        }
+    }
+
+    public static void listenToTwitchChat(ModProperties arguments, Map<String, TwitchChatter> twitchChatters) {
         if (client == null) {
             client = createClient();
 
-            listener = new WebSocketListener(arguments, chatListener);
+            listener = new WebSocketListener(arguments, twitchChatters);
+            ChatListeners.start();
             client.newWebSocketBuilder()
                     .buildAsync(
                             URI.create("ws://irc-ws.chat.twitch.tv:80"),
@@ -63,15 +96,16 @@ public class TwitchChatBotClient {
         private String oauthToken;
         private final String botName;
         private final boolean debug;
-        private ChatListener chatListener;
         private boolean shutdown;
 
-        public WebSocketListener(ModProperties modProperties, ChatListener chatListener) {
+        public WebSocketListener(ModProperties modProperties,
+                                 Map<String, TwitchChatter> twitchChatters) {
             this.channelName = modProperties.getChannelName();
             this.botName = modProperties.getBotName();
             this.oauthToken = modProperties.getOauthToken();
             this.debug = modProperties.getDebug();
-            this.chatListener = chatListener;
+            BotCommandHandlers.init(twitchChatters);
+            ChatListeners.init(twitchChatters);
         }
 
         @Override
@@ -132,10 +166,11 @@ public class TwitchChatBotClient {
                     String command = message.command.getCommand();
                     if ("PRIVMSG".equals(command)) {
                         if (message.command.botCommand != null) {
+                            BotCommandHandlers.handleBotCommand(message);
                             // here comes the botCommand handling
                         } else {
                             if (message.parameters != null) {
-                                chatListener.onText(message.source.nick, message.parameters, ColorParser.parseFromHex(message.tags.getColor()));
+                                ChatListeners.handleOnText(message.source.nick, message.parameters, ColorParser.parseFromHex(message.tags.getColor()));
                             }
                         }
                     } else if ("PING".equals(command)) {

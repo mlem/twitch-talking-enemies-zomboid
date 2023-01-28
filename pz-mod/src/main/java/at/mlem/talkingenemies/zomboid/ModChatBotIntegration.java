@@ -1,5 +1,7 @@
 package at.mlem.talkingenemies.zomboid;
 
+import at.mlem.talkingenemies.zomboid.command.BotCommandHandlers;
+import at.mlem.talkingenemies.zomboid.tts.TTSBotCommandHandler;
 import io.pzstorm.storm.logging.StormLogger;
 
 import java.util.*;
@@ -22,10 +24,12 @@ public class ModChatBotIntegration {
         blacklist = modProperties.getBlacklist();
         validateAndUpdateToken(modProperties);
 
-        chatListener = new ModChatListener(twitchChatters);
+        chatListener = new ModChatListener();
+        TwitchChatBotClient.ChatListeners.register(chatListener);
+        BotCommandHandlers.registerCommandHandler(new TTSBotCommandHandler());
         TwitchChatBotClient.listenToTwitchChat(
                 modProperties,
-                chatListener);
+                twitchChatters);
         chatListener.start();
     }
 
@@ -54,11 +58,7 @@ public class ModChatBotIntegration {
         twitchChatters = new HashMap<>();
         ZombieStore.resetStore();
         TwitchChatBotClient.shutdownClient();
-        if (chatListener != null) {
-            chatListener.stop();
-            chatListener = null;
-
-        }
+        TwitchChatBotClient.ChatListeners.stop();
     }
 
 
@@ -67,7 +67,10 @@ public class ModChatBotIntegration {
         private boolean listenToMessages;
         private Map<String, TwitchChatter> twitchChatters;
 
-        public ModChatListener(Map<String, TwitchChatter> twitchChatters) {
+        public ModChatListener() {
+        }
+
+        public void init(Map<String, TwitchChatter> twitchChatters) {
             this.twitchChatters = twitchChatters;
         }
 

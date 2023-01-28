@@ -1,0 +1,11 @@
+### Test simple text with wrong voice
+GET http://localhost:7070/tts/mlem86?voice=MALE&text=HelloWorld
+
+### Test no gender
+GET http://localhost:7070/tts/mlem86?text=HelloWorld
+
+### Test complex text in american
+GET http://localhost:7070/tts/mlem86?voice=USA_M_LOW&text=hallo%2C%20mein%20name%20ist%20martin.%20Wie%20geht's%20dir%3F
+
+### Test brainz
+GET http://localhost:7070/tts/mlem86?voice=USA_M_LOW&text=Brainz
