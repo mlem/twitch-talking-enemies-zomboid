@@ -59,7 +59,7 @@ jobs:
 
       # build zip/tar file and deploy it
       - name: Publish to GitHub Packages Apache Maven
-        run: mvn --projects pz-mod -B assembly:single
+        run: mvn --projects pz-mod,tts-backend -B assembly:single
       # Upload dist artifacts as run artifacts
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
@@ -69,4 +69,7 @@ jobs:
            pz-mod/target/*.jar
            pz-mod/target/*.tar
            pz-mod/target/*.zip
+           tts-backend/target/*.jar
+           tts-backend/target/*.tar
+           tts-backend/target/*.zip
            

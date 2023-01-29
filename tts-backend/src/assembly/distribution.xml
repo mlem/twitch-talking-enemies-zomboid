@@ -1,0 +1,36 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+    <id>dist</id>
+    <formats>
+        <format>zip</format>
+        <format>tar</format>
+    </formats>
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/lib</directory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+            <filtered>false</filtered>
+            <outputDirectory>/backend/lib</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>./src/assembly</directory>
+            <includes>
+                <include>start-backend.bat</include>
+            </includes>
+            <outputDirectory>/backend</outputDirectory>
+        </fileSet>
+    </fileSets>
+    <files>
+        <file>
+            <source>${project.build.directory}/${project.build.finalName}.jar</source>
+            <outputDirectory>/backend</outputDirectory>
+            <destName>tts-backend.jar</destName>
+        </file>
+    </files>
+</assembly>
