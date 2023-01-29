@@ -73,6 +73,7 @@ public class GoogleCloudTTSService {
                             .setAudioEncoding(AudioEncoding.LINEAR16)
                             .setSpeakingRate(voiceGender.getSpeakingRate())
                             .setPitch(voiceGender.getPitch())
+                            .setVolumeGainDb(-0.5)
                             .build();
 
             logger.info("Starting request");

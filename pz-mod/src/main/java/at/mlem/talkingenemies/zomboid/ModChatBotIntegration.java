@@ -11,12 +11,11 @@ public class ModChatBotIntegration {
     public static final Random RANDOM = new Random();
     private TwitchChatBotClient.ChatListener chatListener;
 
-    private Map<String, TwitchChatter> twitchChatters = new HashMap<>();
+
     private List<String> blacklist;
 
 
-    public void startTwitchChat() {
-        twitchChatters = new HashMap<>();
+    public void startTwitchChat(Map<String, TwitchChatter> twitchChatters) {
         ZombieStore.resetStore();
 
         ModProperties modProperties = new ModProperties();
@@ -31,6 +30,7 @@ public class ModChatBotIntegration {
                 modProperties,
                 twitchChatters);
         chatListener.start();
+
     }
 
     private void validateAndUpdateToken(ModProperties modProperties) {
@@ -55,7 +55,6 @@ public class ModChatBotIntegration {
     }
 
     public void stopTwitchChat() {
-        twitchChatters = new HashMap<>();
         ZombieStore.resetStore();
         TwitchChatBotClient.shutdownClient();
         TwitchChatBotClient.ChatListeners.stop();

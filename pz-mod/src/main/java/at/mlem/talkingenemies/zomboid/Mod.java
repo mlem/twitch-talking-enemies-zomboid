@@ -15,7 +15,7 @@ import java.util.*;
 public class Mod implements ZomboidMod {
 
     private ModChatBotIntegration modChatBotIntegration;
-
+    private Map<String, TwitchChatter> twitchChatters = new HashMap<>();
     public static boolean debug;
 
 
@@ -29,7 +29,9 @@ public class Mod implements ZomboidMod {
     @SubscribeEvent
     public void handlePreMapLoad(OnPreMapLoadEvent event) {
         modChatBotIntegration = new ModChatBotIntegration();
-        modChatBotIntegration.startTwitchChat();
+        twitchChatters = new HashMap<>();
+        modChatBotIntegration.startTwitchChat(twitchChatters);
+
     }
 
 
@@ -38,20 +40,27 @@ public class Mod implements ZomboidMod {
         if (modChatBotIntegration != null) {
             modChatBotIntegration.stopTwitchChat();
             modChatBotIntegration = null;
+            twitchChatters = new HashMap<>();
         }
     }
 
     @SubscribeEvent
     public void handleZombieUpdate(OnZombieUpdateEvent zombieUpdateEvent) {
+        StormLogger.debug("handling Talking Zombie update (" + zombieUpdateEvent.zombie+ ")");
         IsoZombie zombie = zombieUpdateEvent.zombie;
         if (modChatBotIntegration != null) {
+
             TalkingZombie talkingZombie = ZombieStore.getInstance().getOrCreate(zombie.getUID(), zombie);
+            twitchChatters.values().stream()
+                    .filter(chatter -> !chatter.hasZombie())
+                    .forEach(chatter -> ZombieStore.getInstance().addToChatterQueue(chatter));
             ZombieStore.getInstance().assignOrRemoveAssignableZombie(talkingZombie);
             talkingZombie.sayTwitchChat();
         }
     }
     @SubscribeEvent
     public void handleZombie(OnAIStateChangeEvent aiStateChange) {
+        StormLogger.debug("handling Talking Zombie aiStateChange (" + aiStateChange.character+ ")");
         IsoGameCharacter character = aiStateChange.character;
         if (character != null
                 && character instanceof IsoZombie

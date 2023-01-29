@@ -8,11 +8,10 @@ import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 /**
  * to get a token, call https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=f1sjgf9y0ytdx2re1oapwfs7l11lh3&redirect_uri=http://localhost&scope=chat%3Aread+chat%3Aedit
@@ -25,11 +24,26 @@ public class TwitchChatBotClient {
 
     private static HttpClient client;
     private static WebSocketListener listener;
+    private static Timer timer;
+    private static CompletableFuture<WebSocket> webSocketCompletableFuture;
 
     public static void shutdownClient() {
         client = null;
         if (listener != null) {
             listener.shutdown();
+        }
+        if(webSocketCompletableFuture != null) {
+            try {
+                WebSocket websocket = webSocketCompletableFuture.get();
+                websocket.abort();
+            } catch (InterruptedException | ExecutionException e) {
+                StormLogger.error("failed to get websocket from future", e);
+            }
+            webSocketCompletableFuture.cancel(true);
+            webSocketCompletableFuture = null;
+        }
+        if (timer != null) {
+            timer.cancel();
         }
     }
 
@@ -75,11 +89,31 @@ public class TwitchChatBotClient {
 
             listener = new WebSocketListener(arguments, twitchChatters);
             ChatListeners.start();
-            client.newWebSocketBuilder()
+            webSocketCompletableFuture = client.newWebSocketBuilder()
                     .buildAsync(
                             URI.create("ws://irc-ws.chat.twitch.tv:80"),
                             listener
-                    ).join();
+                    );
+
+
+            timer = new Timer("check Twitchchat connectivity", true);
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    StormLogger.debug("Checking websocket connection to twitch.");
+                    try {
+                        WebSocket webSocket1 = webSocketCompletableFuture.get();
+
+                        if (webSocket1 == null || webSocket1.isInputClosed()) {
+                            StormLogger.warn("No Twitch chat connection. Retrying connection.");
+                            listenToTwitchChat(arguments, twitchChatters);
+                        }
+                    } catch (Exception e) {
+                        StormLogger.error("Couldn't get websocket from completable future.", e);
+                        throw new RuntimeException(e);
+                    }
+                }
+            }, 10000, 10000);
         }
     }
 
@@ -187,7 +221,7 @@ public class TwitchChatBotClient {
                         StormLogger.info(String.format("Received 001 which means successfully logged in: %s", receivedMessage));
                     }
                 } catch (Exception e) {
-                    StormLogger.error(String.format("Problem with the message \"%s\"", receivedMessage));
+                    StormLogger.error(String.format("Problem with the message \"%s\"", receivedMessage), e);
                 }
             }
             return completionStage;

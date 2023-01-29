@@ -63,14 +63,18 @@ public class ZombieStore {
     }
 
     public void addToAssignableZombies(TalkingZombie talkingZombie) {
-        if (!assignableZombies.contains(talkingZombie) && !talkingZombie.isAssigned()) {
+        if (!talkingZombie.isAssigned()) {
             if(!twitchChatterQueue.isEmpty()) {
                 TwitchChatter twitchChatter = twitchChatterQueue.poll();
-                twitchChatter.assign(talkingZombie);
+                if(!twitchChatter.hasZombie()) {
+                    twitchChatter.assign(talkingZombie);
+                }
             } else {
-                StormLogger.info(String.format("Adding Zombie %s to assignable Zombies (Size: %d)",
-                        talkingZombie.getZombieID(), assignableZombies.size()));
-                assignableZombies.add(talkingZombie);
+                if(!assignableZombies.contains(talkingZombie)) {
+                    StormLogger.info(String.format("Adding Zombie %s to assignable Zombies (Size: %d)",
+                            talkingZombie.getZombieID(), assignableZombies.size()));
+                    assignableZombies.add(talkingZombie);
+                }
             }
         }
     }
@@ -99,6 +103,12 @@ public class ZombieStore {
                 StormLogger.info(String.format("adding user %s to queue", twitchChatter.getName()));
             }
 
+        }
+    }
+
+    public void addToChatterQueue(TwitchChatter twitchChatter) {
+        if(twitchChatterQueue!= null && !twitchChatterQueue.contains(twitchChatter)) {
+            twitchChatterQueue.add(twitchChatter);
         }
     }
 

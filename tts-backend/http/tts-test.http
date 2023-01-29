@@ -9,3 +9,6 @@ GET http://localhost:7070/tts/mlem86?voice=USA_M_LOW&text=hallo%2C%20mein%20name
 
 ### Test brainz
 GET http://localhost:7070/tts/mlem86?voice=USA_M_LOW&text=Brainz
+
+### real live example
+GET http://localhost:7070/tts/mlem86?voice=GER_F_LOW&text=hallo+test

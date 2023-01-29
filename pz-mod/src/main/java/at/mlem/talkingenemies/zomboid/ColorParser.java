@@ -10,7 +10,7 @@ public class ColorParser {
     private static Random random = new Random();
 
     public static Color parseFromHex(String color) {
-        if(!color.startsWith("#")) {
+        if(color == null || !color.startsWith("#")) {
             return new Color(random.nextFloat(), random.nextFloat(), random.nextFloat());
         }
         long rLong = Long.parseLong(color.substring(1, 3), 16);

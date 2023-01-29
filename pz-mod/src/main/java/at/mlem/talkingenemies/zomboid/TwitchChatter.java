@@ -6,7 +6,6 @@ import zombie.core.textures.ColorInfo;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,6 +17,7 @@ public class TwitchChatter {
     private Queue<String> messageBacklog = new ArrayDeque<>();
 
     private TalkingZombie assignedZombie;
+    private Queue<String> nextSounds = new ArrayDeque<>();
 
     public TwitchChatter(String name, Color color) {
         this.name = name;
@@ -55,6 +55,10 @@ public class TwitchChatter {
         StormLogger.info(String.format("assigned user %s to zombie %s", getName(), zombie.getZombieID()));
         addMessagesFromBacklog();
         zombie.assignTwitchUser(this);
+        String nextSound = nextSounds.poll();
+        if(nextSound != null) {
+            assignedZombie.playSound(nextSound);
+        }
     }
 
     public void addMessagesFromBacklog() {
@@ -75,4 +79,19 @@ public class TwitchChatter {
         return colorInfo;
     }
 
+    public void addNextSound(String activeFileMapKey) {
+        if(assignedZombie != null && assignedZombie.isAssigned()) {
+            assignedZombie.playSound(activeFileMapKey);
+        } else {
+            StormLogger.info("adding tts " + activeFileMapKey + " to queue");
+            nextSounds.add(activeFileMapKey);
+        }
+    }
+
+    public void playSound() {
+        String nextSound = nextSounds.poll();
+        if(nextSound != null) {
+            assignedZombie.playSound(nextSound);
+        }
+    }
 }

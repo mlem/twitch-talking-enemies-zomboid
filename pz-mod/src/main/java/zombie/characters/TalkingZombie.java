@@ -6,6 +6,7 @@ import zombie.core.textures.ColorInfo;
 import zombie.ui.TextDrawObject;
 import zombie.ui.UIFont;
 
+import java.io.File;
 import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -82,6 +83,7 @@ public class TalkingZombie {
                 say(twitchChatter.getName() + ": " + messages.poll());
                 lastSpoken = Instant.now().getEpochSecond();
             }
+            twitchChatter.playSound();
         }
     }
 
@@ -139,6 +141,13 @@ public class TalkingZombie {
 
     public void clearChatter() {
         twitchChatter = null;
+    }
+
+    public void playSound(String fileName) {
+        if(zombie != null) {
+            StormLogger.info("playing tts " + fileName);
+            zombie.getEmitter().playSound(fileName, zombie);
+        }
     }
 }
 

@@ -21,6 +21,9 @@ public class BotCommandHandlers {
     }
 
     public static void handleBotCommand(TwitchChatParser.Message message) {
+        if(message.command == null || message.command.botCommandParams == null) {
+            return;
+        }
         StormLogger.info("received message \""+ message.command.botCommand + " "
                 + message.command.botCommandParams + "\"");
         botCommandHandlers.stream()
