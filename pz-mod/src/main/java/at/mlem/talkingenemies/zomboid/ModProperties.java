@@ -17,6 +17,7 @@ public class ModProperties {
     public static final String CHANNEL_NAME_PROPERTY = "channelName";
     public static final String OAUTH_TOKEN_PROPERTY = "oauthToken";
     public static final String BLACKLIST_PROPERTY = "blacklist";
+    public static final String TTS_ACTIVE_PROPERTY = "tts.active";
     private Boolean debug;
     private String botName;
     private String channelName;
@@ -25,6 +26,7 @@ public class ModProperties {
     private List<String> blacklist;
 
     private static Properties properties;
+    private Boolean ttsActive = false;
 
 
     public ModProperties() {
@@ -36,17 +38,19 @@ public class ModProperties {
             this.channelName = "";
             this.oauthToken = "";
             this.blacklist = List.of();
+            this.ttsActive = false;
 
         } else {
-            this.debug = debug(properties.getProperty(DEBUG_PROPERTY));
+            this.debug = toBoolean(properties.getProperty(DEBUG_PROPERTY));
             this.botName = properties.getProperty(BOT_NAME_PROPERTY);
             this.channelName = channelName(properties.getProperty(CHANNEL_NAME_PROPERTY));
             this.oauthToken = properties.getProperty(OAUTH_TOKEN_PROPERTY);
             this.blacklist = Arrays.stream(properties.getProperty(BLACKLIST_PROPERTY).split(",")).toList();
+            this.ttsActive = toBoolean(properties.getProperty(TTS_ACTIVE_PROPERTY));
         }
     }
 
-    private static Boolean debug(String debugString) {
+    private static Boolean toBoolean(String debugString) {
         return Boolean.valueOf(debugString);
     }
 
@@ -111,6 +115,7 @@ public class ModProperties {
         properties.setProperty(CHANNEL_NAME_PROPERTY, channelName);
         properties.setProperty(OAUTH_TOKEN_PROPERTY, oauthToken);
         properties.setProperty(BLACKLIST_PROPERTY, blacklist.stream().collect(Collectors.joining(",")));
+        properties.setProperty(TTS_ACTIVE_PROPERTY, Boolean.toString(ttsActive));
 
         File propertiesFile = propertiesFile();
         try {
@@ -123,5 +128,13 @@ public class ModProperties {
 
     public void setChannelName(String channelName) {
         this.channelName = channelName;
+    }
+
+    public boolean isTtsActive() {
+        return ttsActive;
+    }
+
+    public void setTtsActive(boolean ttsActive) {
+        this.ttsActive = ttsActive;
     }
 }

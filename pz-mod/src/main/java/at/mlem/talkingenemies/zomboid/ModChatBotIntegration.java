@@ -25,7 +25,9 @@ public class ModChatBotIntegration {
 
         chatListener = new ModChatListener();
         TwitchChatBotClient.ChatListeners.register(chatListener);
-        BotCommandHandlers.registerCommandHandler(new TTSBotCommandHandler());
+        if(modProperties.isTtsActive()) {
+            BotCommandHandlers.registerCommandHandler(new TTSBotCommandHandler());
+        }
         TwitchChatBotClient.listenToTwitchChat(
                 modProperties,
                 twitchChatters);
