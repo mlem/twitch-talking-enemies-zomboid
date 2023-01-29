@@ -21,6 +21,7 @@ public class TalkingZombie {
 
     private TwitchChatter twitchChatter;
     private long lastSpoken = 0;
+    private long soundRef = 0;
 
     public TalkingZombie(IsoZombie zombie) {
 
@@ -145,8 +146,10 @@ public class TalkingZombie {
 
     public void playSound(String fileName) {
         if(zombie != null) {
-            StormLogger.info("playing tts " + fileName);
-            zombie.getEmitter().playSound(fileName, zombie);
+            if(!zombie.getEmitter().isPlaying(soundRef)) {
+                StormLogger.info("playing tts " + fileName);
+                soundRef = zombie.getEmitter().playSound(fileName, zombie);
+            }
         }
     }
 }

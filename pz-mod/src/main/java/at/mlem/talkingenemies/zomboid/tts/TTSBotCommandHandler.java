@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -106,7 +107,9 @@ public class TTSBotCommandHandler implements BotCommandHandler {
                     + "&text=" + URLEncoder.encode(text, StandardCharsets.UTF_8);
 
             StormLogger.info("Creating TTS for " + key);
-            try(InputStream inputStream = URI.create(getUrl).toURL().openStream();) {
+            URLConnection connection = URI.create(getUrl).toURL().openConnection();
+            connection.setConnectTimeout(1000);
+            try(InputStream inputStream = connection.getInputStream()) {
                 ZomboidFileSystem.ensureFolderExists(outputFile.getParentFile());
                 ZomboidFileSystem.instance.ActiveFileMap.put(key, outputFile.getPath());
 
